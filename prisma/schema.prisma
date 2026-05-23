@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model PropertyData {
+  id            String   @id @default(cuid())
+  comuna        String
+  sector        String   @default("")
+  propertyType  String   // "casa", "departamento", "terreno", "agricola"
+  avgPricePerM2 Float    // en UF
+  minPricePerM2 Float?
+  maxPricePerM2 Float?
+  referenceYear Int      @default(2025)
+  sampleSize    Int      @default(1)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([comuna, sector, propertyType])
+}
+
+model TasacionRequest {
+  id                String   @id @default(cuid())
+  clientName        String
+  clientEmail       String
+  clientPhone       String
+  comuna            String
+  sector            String   @default("")
+  propertyType      String
+  surface           Float
+  condition         String   @default("normal")
+  estimatedValueUF  Float
+  estimatedValueCLP Float
+  paymentStatus     String   @default("pending") // "pending", "paid"
+  paymentId         String?
+  createdAt         DateTime @default(now())
+}
+
+model PropertyListing {
+  id              String   @id @default(cuid())
+  title           String
+  description     String   @default("")
+  propertyType    String   // "casa", "departamento", "terreno", "agricola"
+  transactionType String   @default("venta") // "venta", "arriendo"
+  comuna          String
+  sector          String   @default("")
+  address         String   @default("")
+  surface         Float    // m² construidos
+  terrainSurface  Float?   // m² terreno
+  bedrooms        Int?
+  bathrooms       Int?
+  parkingSpaces   Int?
+  priceUF         Float
+  priceNegotiable Boolean  @default(false)
+  status          String   @default("disponible") // "disponible", "reservado", "vendido"
+  isActive        Boolean  @default(true)
+  contactName     String
+  contactPhone    String
+  contactEmail    String   @default("")
+  features        String   @default("[]") // JSON array
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
