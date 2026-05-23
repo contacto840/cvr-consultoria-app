@@ -45,3 +45,6 @@ next-env.d.ts
 # SQLite local (ya no se usa en producción)
 *.db
 *.db-journal
+
+# Claude local settings
+.claude/
