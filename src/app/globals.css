@@ -44,7 +44,7 @@
 html { scroll-behavior: smooth; }
 
 body {
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-inter), sans-serif;
   background: var(--navy);
   color: var(--text);
   line-height: 1.65;
@@ -55,9 +55,9 @@ body {
 /* ============================================
    TYPOGRAPHY
 ============================================ */
-.serif { font-family: 'Playfair Display', Georgia, serif; }
+.serif { font-family: var(--font-playfair), Georgia, serif; }
 
-h1, h2, h3 { font-family: 'Playfair Display', Georgia, serif; letter-spacing: -0.01em; }
+h1, h2, h3 { font-family: var(--font-playfair), Georgia, serif; letter-spacing: -0.01em; }
 
 /* ============================================
    SHARED UTILITIES
@@ -93,7 +93,7 @@ h1, h2, h3 { font-family: 'Playfair Display', Georgia, serif; letter-spacing: -0
   padding: 0.85rem 2rem;
   background: var(--gold);
   color: #05080d;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-inter), sans-serif;
   font-size: 0.88rem;
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -117,7 +117,7 @@ h1, h2, h3 { font-family: 'Playfair Display', Georgia, serif; letter-spacing: -0
   padding: 0.85rem 2rem;
   background: transparent;
   color: var(--text);
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-inter), sans-serif;
   font-size: 0.88rem;
   font-weight: 600;
   border: 1px solid var(--border);
@@ -160,7 +160,7 @@ h1, h2, h3 { font-family: 'Playfair Display', Georgia, serif; letter-spacing: -0
   text-decoration: none;
 }
 .nav-logo-cvr {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-playfair), serif;
   font-size: 1.55rem;
   font-weight: 900;
   color: var(--text);
@@ -306,7 +306,7 @@ h1, h2, h3 { font-family: 'Playfair Display', Georgia, serif; letter-spacing: -0
 .hero-stat:last-child { border-right: none; margin-right: 0; padding-right: 0; }
 
 .hero-stat-num {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-playfair), serif;
   font-size: 2.2rem;
   font-weight: 700;
   color: var(--gold);
@@ -438,7 +438,7 @@ h1, h2, h3 { font-family: 'Playfair Display', Georgia, serif; letter-spacing: -0
   font-size: 1.25rem;
   font-weight: 700;
   margin-bottom: 0.75rem;
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-playfair), serif;
 }
 
 .service-card p {
@@ -491,7 +491,7 @@ h1, h2, h3 { font-family: 'Playfair Display', Georgia, serif; letter-spacing: -0
 
 .about-card-main::before {
   content: '"';
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-playfair), serif;
   font-size: 8rem;
   line-height: 1;
   color: var(--gold);
@@ -502,7 +502,7 @@ h1, h2, h3 { font-family: 'Playfair Display', Georgia, serif; letter-spacing: -0
 }
 
 .about-quote {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-playfair), serif;
   font-size: 1.1rem;
   font-style: italic;
   color: var(--text);
@@ -536,7 +536,7 @@ h1, h2, h3 { font-family: 'Playfair Display', Georgia, serif; letter-spacing: -0
 }
 
 .about-stat-num {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-playfair), serif;
   font-size: 2rem;
   font-weight: 700;
   color: var(--gold);
@@ -714,7 +714,7 @@ h1, h2, h3 { font-family: 'Playfair Display', Georgia, serif; letter-spacing: -0
   padding: 0.85rem 1rem;
   font-size: 0.9rem;
   color: var(--text);
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-inter), sans-serif;
   transition: border-color 0.25s;
   outline: none;
 }
@@ -749,7 +749,7 @@ footer {
 .footer-left { display: flex; align-items: baseline; gap: 0.6rem; }
 
 .footer-cvr {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-playfair), serif;
   font-size: 1.1rem;
   font-weight: 900;
   color: var(--text);
@@ -954,7 +954,7 @@ footer {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-inter), sans-serif;
 }
 .quick-type-tab.active {
   border-color: var(--gold);
@@ -991,7 +991,7 @@ footer {
   padding: 0.85rem 1rem;
   font-size: 0.9rem;
   color: var(--text);
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-inter), sans-serif;
   transition: border-color 0.2s;
   outline: none;
 }
@@ -1110,13 +1110,13 @@ footer {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-inter), sans-serif;
 }
 .process-step h3 {
   font-size: 1.1rem;
   font-weight: 700;
   margin-bottom: 0.6rem;
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-playfair), serif;
 }
 .process-step p {
   font-size: 0.85rem;
@@ -1181,7 +1181,7 @@ footer {
 }
 .testimonial-card::before {
   content: '\201C';
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-playfair), serif;
   font-size: 5rem;
   line-height: 1;
   color: var(--gold);
@@ -1313,7 +1313,7 @@ footer {
   font-size: 1.3rem;
   font-weight: 700;
   margin-bottom: 0.5rem;
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-playfair), serif;
 }
 .pricing-card .pricing-desc {
   font-size: 0.85rem;
@@ -1329,7 +1329,7 @@ footer {
   border-bottom: 1px solid var(--border);
 }
 .pricing-amount {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-playfair), serif;
   font-size: 2rem;
   font-weight: 700;
   color: var(--gold);

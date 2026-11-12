@@ -1,4 +1,4 @@
-import { PDFDocument, rgb, StandardFonts, PDFFont, PDFPage } from "pdf-lib";
+import { PDFDocument, rgb, StandardFonts, PDFPage } from "pdf-lib";
 
 const GOLD = rgb(0.773, 0.659, 0.357);   // #c5a85b
 const NAVY = rgb(0.020, 0.047, 0.090);   // #050c17
@@ -72,7 +72,6 @@ export async function generateTasacionPDF(data: TasacionReportData): Promise<Uin
 
   const bold = await doc.embedFont(StandardFonts.HelveticaBold);
   const regular = await doc.embedFont(StandardFonts.Helvetica);
-  const oblique = await doc.embedFont(StandardFonts.HelveticaOblique);
 
   // ── HEADER BAND ────────────────────────────────────────────
   drawRect(page, 0, pageHeight - 90, pageWidth, 90, NAVY);

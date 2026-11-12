@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { ÑUBLE_COMMUNES, SECTORS_BY_COMMUNE } from "@/lib/seed-data";
 
 const PHONE = "56938689157";
@@ -16,7 +15,7 @@ const inputStyle: React.CSSProperties = {
   fontSize: 15,
   width: "100%",
   outline: "none",
-  fontFamily: "Inter, sans-serif",
+  fontFamily: "var(--font-inter), sans-serif",
   boxSizing: "border-box",
 };
 
@@ -45,13 +44,11 @@ const gridRow: React.CSSProperties = {
 };
 
 export default function AgregarPropiedadPage() {
-  const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
 
-  const [sectors, setSectors] = useState<string[]>([]);
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -72,15 +69,12 @@ export default function AgregarPropiedadPage() {
     contactEmail: "",
   });
 
-  // Update sectors when commune changes
-  useEffect(() => {
-    const s = SECTORS_BY_COMMUNE[form.comuna] ?? [];
-    setSectors(s);
-    setForm(f => ({ ...f, sector: "" }));
-  }, [form.comuna]);
+  // Sectors depend on the selected commune (derived during render)
+  const sectors = SECTORS_BY_COMMUNE[form.comuna] ?? [];
 
+  // Changing commune invalidates the dependent sector selection
   const set = (field: string, value: string | boolean) =>
-    setForm(f => ({ ...f, [field]: value }));
+    setForm(f => ({ ...f, [field]: value, ...(field === "comuna" ? { sector: "" } : {}) }));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -137,7 +131,7 @@ export default function AgregarPropiedadPage() {
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: "#050c17", color: "#fff", fontFamily: "Inter, sans-serif" }}>
+    <div style={{ minHeight: "100vh", background: "#050c17", color: "#fff", fontFamily: "var(--font-inter), sans-serif" }}>
       {/* ── NAVBAR ───────────────────────────────────────────── */}
       <nav style={{ background: "rgba(5,12,23,0.97)", borderBottom: "1px solid rgba(197,168,91,0.2)", position: "sticky", top: 0, zIndex: 100, padding: "0 24px" }}>
         <div style={{ maxWidth: 1100, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", height: 64 }}>

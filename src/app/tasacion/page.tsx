@@ -40,29 +40,51 @@ const fmtUF = (n: number) => n.toLocaleString("es-CL", { minimumFractionDigits: 
 
 function TasacionContent() {
   const searchParams = useSearchParams();
-  const [communes, setCommunes] = useState<string[]>([]);
-  const [sectors, setSectors] = useState<string[]>([]);
-  const [form, setForm] = useState({
-    clientName: "", clientEmail: "", clientPhone: "",
-    comuna: "", sector: "", propertyType: "casa",
-    surface: "", condition: "normal", age: "10",
-  });
-
-  const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<TasacionResult | null>(null);
-  const [error, setError] = useState("");
-  const [tasacionId, setTasacionId] = useState("");
-
-  // Payment states
-  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
-  const [paymentSuccess, setPaymentSuccess] = useState(false);
-  const [verifyingPayment, setVerifyingPayment] = useState(false);
 
   // Quick-estimate pre-fill from URL params (from homepage widget)
   const quickTipo = searchParams.get("tipo");
   const quickComuna = searchParams.get("comuna");
   const quickSuperficie = searchParams.get("superficie");
   const isQuickMode = !!(quickTipo && quickComuna && quickSuperficie);
+
+  // MercadoPago redirect status (from back_urls)
+  const paymentStatus = searchParams.get("status");
+  const paymentId = searchParams.get("payment_id");
+  const paidTasacionId = searchParams.get("id"); // tasacionId from our back_urls
+  const simulated = searchParams.get("simulated") === "true";
+  const shouldVerifyPayment = paymentStatus === "approved" && !!paidTasacionId;
+
+  const [communes, setCommunes] = useState<string[]>([]);
+  const [form, setForm] = useState({
+    clientName: "", clientEmail: "", clientPhone: "",
+    comuna: quickComuna || "",
+    sector: "",
+    propertyType: quickTipo || "casa",
+    surface: quickSuperficie || "",
+    condition: "normal",
+    age: "10",
+  });
+
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<TasacionResult | null>(null);
+  // A rejected payment comes back as a URL param, so it seeds the error message
+  const [error, setError] = useState(
+    paymentStatus === "failed"
+      ? "El pago ha fallado o fue rechazado. Por favor, intente nuevamente."
+      : ""
+  );
+  const [tasacionId, setTasacionId] = useState("");
+
+  // Payment states
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [paymentVerification, setPaymentVerification] = useState<"verified" | "error" | null>(null);
+
+  // Derived: the spinner stays on while the verification request is in flight
+  const verifyingPayment = shouldVerifyPayment && paymentVerification === null;
+  const paymentSuccess = paymentVerification === "verified";
+
+  // Sectors depend on the selected commune (derived during render)
+  const sectors = SECTORS_BY_COMMUNE[form.comuna] ?? [];
 
   useEffect(() => {
     fetch("/api/tasacion")
@@ -71,61 +93,45 @@ function TasacionContent() {
         if (d.ok) {
           const unique = [...new Set<string>(d.data.map((x: { comuna: string }) => x.comuna))].sort();
           setCommunes(unique);
-          // Pre-fill from quick mode after communes load
-          if (quickTipo || quickComuna || quickSuperficie) {
-            setForm((prev) => ({
-              ...prev,
-              propertyType: quickTipo || prev.propertyType,
-              comuna: quickComuna || prev.comuna,
-              surface: quickSuperficie || prev.surface,
-            }));
-          }
         }
       });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Update sectors when commune changes
+  // Verify the payment with our backend after the MercadoPago redirect
   useEffect(() => {
-    const s = SECTORS_BY_COMMUNE[form.comuna] ?? [];
-    setSectors(s);
-    setForm(f => ({ ...f, sector: "" }));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form.comuna]);
+    if (!shouldVerifyPayment || !paidTasacionId) return;
+    const idToVerify = paidTasacionId;
+    let cancelled = false;
 
-  // Check for MercadoPago redirect status
-  useEffect(() => {
-    const status = searchParams.get("status");
-    const payment_id = searchParams.get("payment_id");
-    const id = searchParams.get("id"); // tasacionId from our back_urls
-    const simulated = searchParams.get("simulated");
-
-    if (status === "approved" && id) {
-      setVerifyingPayment(true);
-      // Verify payment with our backend
-      fetch("/api/pagos/confirmar", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tasacionId: id, payment_id, simulated: simulated === "true" }),
+    fetch("/api/pagos/confirmar", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ tasacionId: idToVerify, payment_id: paymentId, simulated }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (cancelled) return;
+        if (data.ok) {
+          setPaymentVerification("verified");
+          setTasacionId(idToVerify);
+        } else {
+          setPaymentVerification("error");
+          setError(data.error || "Error verificando el pago.");
+        }
       })
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.ok) {
-            setPaymentSuccess(true);
-            setTasacionId(id);
-          } else {
-            setError(data.error || "Error verificando el pago.");
-          }
-        })
-        .catch(() => setError("Error de conexión al verificar pago."))
-        .finally(() => setVerifyingPayment(false));
-    } else if (status === "failed") {
-      setError("El pago ha fallado o fue rechazado. Por favor, intente nuevamente.");
-    }
-  }, [searchParams]);
+      .catch(() => {
+        if (cancelled) return;
+        setPaymentVerification("error");
+        setError("Error de conexión al verificar pago.");
+      });
+
+    return () => { cancelled = true; };
+  }, [shouldVerifyPayment, paidTasacionId, paymentId, simulated]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    const { name, value } = e.target;
+    // Changing commune invalidates the dependent sector selection
+    setForm((prev) => ({ ...prev, [name]: value, ...(name === "comuna" ? { sector: "" } : {}) }));
     setError("");
   };
 

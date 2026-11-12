@@ -82,10 +82,10 @@ export default function Home() {
     <>
       {/* ── NAVBAR ───────────────────────────────────────── */}
       <nav className="navbar">
-        <a href="/" className="nav-logo" onClick={closeMenu}>
+        <Link href="/" className="nav-logo" onClick={closeMenu}>
           <span className="nav-logo-cvr">CVR</span>
           <span className="nav-logo-sub">Consultoría Predial</span>
-        </a>
+        </Link>
         <ul className="nav-links">
           <li><a href="#servicios">Servicios</a></li>
           <li><a href="#proceso">Proceso</a></li>

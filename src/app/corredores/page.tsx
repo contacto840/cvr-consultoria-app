@@ -147,7 +147,7 @@ export default function CorredoresPage() {
                 }}>
                   {b.icon}
                 </div>
-                <h3 style={{ fontSize: "1rem", fontWeight: 700, color: "var(--text)", fontFamily: "'Playfair Display',serif" }}>
+                <h3 style={{ fontSize: "1rem", fontWeight: 700, color: "var(--text)", fontFamily: "var(--font-playfair), serif" }}>
                   {b.title}
                 </h3>
                 <p style={{ fontSize: "0.88rem", color: "var(--text-sub)", lineHeight: 1.65, fontWeight: 300 }}>

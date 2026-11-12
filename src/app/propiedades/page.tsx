@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 
 const PHONE = "56938689157";
@@ -44,48 +44,69 @@ interface Listing {
   createdAt: string;
 }
 
-const fmtUF = (n: number) => n.toLocaleString("es-CL", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const fmtCLP = (n: number) => (n * 38500).toLocaleString("es-CL", { maximumFractionDigits: 0 });
+
+// Identifies the query currently shown on screen, so the "loading" flag can be
+// derived from it instead of being toggled inside the fetch effect.
+const queryKey = (page: number, tipo: string, transaccion: string, comuna: string, refresh: number) =>
+  `${page}|${tipo}|${transaccion}|${comuna}|${refresh}`;
 
 export default function PropiedadesPage() {
   const [listings, setListings] = useState<Listing[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [pages, setPages] = useState(1);
-  const [loading, setLoading] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
+  // Bumped by "Buscar" to force a refetch of the same query
+  const [refreshToken, setRefreshToken] = useState(0);
 
   // Filters
   const [filterTipo, setFilterTipo] = useState("");
   const [filterTransaccion, setFilterTransaccion] = useState("");
   const [filterComuna, setFilterComuna] = useState("");
 
-  const fetchListings = useCallback(async () => {
-    setLoading(true);
+  // Last query whose response was applied. Anything else means data is stale.
+  const [loadedKey, setLoadedKey] = useState<string | null>(null);
+  const loading = loadedKey !== queryKey(page, filterTipo, filterTransaccion, filterComuna, refreshToken);
+
+  useEffect(() => {
+    let cancelled = false;
+    const key = queryKey(page, filterTipo, filterTransaccion, filterComuna, refreshToken);
     const params = new URLSearchParams({ page: String(page) });
     if (filterTipo) params.set("tipo", filterTipo);
     if (filterTransaccion) params.set("transaccion", filterTransaccion);
     if (filterComuna) params.set("comuna", filterComuna);
 
-    const res = await fetch(`/api/propiedades?${params}`);
-    if (res.ok) {
-      const data = await res.json();
-      setListings(data.listings);
-      setTotal(data.total);
-      setPages(data.pages);
-    }
-    setLoading(false);
-  }, [page, filterTipo, filterTransaccion, filterComuna]);
+    fetch(`/api/propiedades?${params}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (cancelled) return;
+        if (data) {
+          setListings(data.listings);
+          setTotal(data.total);
+          setPages(data.pages);
+        }
+        setLoadedKey(key);
+      })
+      .catch(() => {
+        if (!cancelled) setLoadedKey(key);
+      });
 
-  useEffect(() => { fetchListings(); }, [fetchListings]);
+    return () => { cancelled = true; };
+  }, [page, filterTipo, filterTransaccion, filterComuna, refreshToken]);
 
-  // Reset page when filters change
-  useEffect(() => { setPage(1); }, [filterTipo, filterTransaccion, filterComuna]);
+  // Any filter change goes back to the first page
+  const changeTipo = (value: string) => { setFilterTipo(value); setPage(1); };
+  const changeTransaccion = (value: string) => { setFilterTransaccion(value); setPage(1); };
+  const changeComuna = (value: string) => { setFilterComuna(value); setPage(1); };
+  const resetFilters = () => {
+    setFilterTipo(""); setFilterTransaccion(""); setFilterComuna(""); setPage(1);
+  };
 
-  const applyFilter = () => { setPage(1); fetchListings(); };
+  const applyFilter = () => { setPage(1); setRefreshToken((t) => t + 1); };
 
   return (
-    <div style={{ minHeight: "100vh", background: "#050c17", color: "#fff", fontFamily: "Inter, sans-serif" }}>
+    <div style={{ minHeight: "100vh", background: "#050c17", color: "#fff", fontFamily: "var(--font-inter), sans-serif" }}>
       {/* ── NAVBAR ─────────────────────────────────────────── */}
       <nav style={{ background: "rgba(5,12,23,0.97)", borderBottom: "1px solid rgba(197,168,91,0.2)", position: "sticky", top: 0, zIndex: 100, padding: "0 24px" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", height: 64 }}>
@@ -153,7 +174,7 @@ export default function PropiedadesPage() {
             <label style={{ display: "block", fontSize: 11, color: "#8fa3bc", fontWeight: 600, marginBottom: 6, textTransform: "uppercase", letterSpacing: 1 }}>
               Tipo de propiedad
             </label>
-            <select value={filterTipo} onChange={e => setFilterTipo(e.target.value)} style={selectStyle}>
+            <select value={filterTipo} onChange={e => changeTipo(e.target.value)} style={selectStyle}>
               <option value="">Todos</option>
               <option value="casa">Casa</option>
               <option value="departamento">Departamento</option>
@@ -165,7 +186,7 @@ export default function PropiedadesPage() {
             <label style={{ display: "block", fontSize: 11, color: "#8fa3bc", fontWeight: 600, marginBottom: 6, textTransform: "uppercase", letterSpacing: 1 }}>
               Operación
             </label>
-            <select value={filterTransaccion} onChange={e => setFilterTransaccion(e.target.value)} style={selectStyle}>
+            <select value={filterTransaccion} onChange={e => changeTransaccion(e.target.value)} style={selectStyle}>
               <option value="">Todas</option>
               <option value="venta">Venta</option>
               <option value="arriendo">Arriendo</option>
@@ -179,8 +200,8 @@ export default function PropiedadesPage() {
               type="text"
               placeholder="Ej: Chillán, San Carlos..."
               value={filterComuna}
-              onChange={e => setFilterComuna(e.target.value)}
-              style={{ ...selectStyle, fontFamily: "Inter, sans-serif" }}
+              onChange={e => changeComuna(e.target.value)}
+              style={{ ...selectStyle, fontFamily: "var(--font-inter), sans-serif" }}
             />
           </div>
           <button onClick={applyFilter} style={{
@@ -191,7 +212,7 @@ export default function PropiedadesPage() {
             Buscar
           </button>
           {(filterTipo || filterTransaccion || filterComuna) && (
-            <button onClick={() => { setFilterTipo(""); setFilterTransaccion(""); setFilterComuna(""); }} style={{
+            <button onClick={resetFilters} style={{
               background: "transparent", color: "#8fa3bc", border: "1px solid rgba(143,163,188,0.3)",
               padding: "11px 16px", borderRadius: 6, fontSize: 13, cursor: "pointer",
             }}>
