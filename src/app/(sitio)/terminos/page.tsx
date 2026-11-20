@@ -38,7 +38,7 @@ export default function TerminosPage() {
           <h2>1. Identificación del prestador</h2>
           <p>
             Este sitio es operado por <strong>{SITE.legalName}</strong>, RUT{" "}
-            <strong>{"{{RUT_PENDIENTE}}"}</strong>, con domicilio en {SITE.city},{" "}
+            <strong>{"78.342.064-3"}</strong>, con domicilio en {SITE.city},{" "}
             {SITE.region}, Chile, correo <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.
             El dominio canónico es {SITE.domain}.
           </p>

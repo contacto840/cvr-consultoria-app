@@ -32,7 +32,12 @@ export default function CostosCalculator() {
     [precioNum, conCredito, pie, plazo, comision]
   );
 
-  const sobrePrecio = precioNum > 0 ? (resultado.totalCLP / precioNum) * 100 : 0;
+  // El porcentaje se mide sobre los costos adicionales, no sobre el total con
+  // el precio dentro: "100,2% del precio" no le dice nada a quien compra.
+  const sobrePrecio =
+    precioNum > 0 ? (resultado.totalAdicionalesCLP / precioNum) * 100 : 0;
+  const fmtPct = (n: number) =>
+    `${n.toLocaleString("es-CL", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`;
 
   return (
     <div className="calc">
@@ -119,8 +124,12 @@ export default function CostosCalculator() {
       <div className="card calc-result">
         <h2 className="h3">Desglose</h2>
         <p className="muted small">
-          El total incluye solo los ítems cuantificables. Los marcados «a cotizar» dependen
-          de un tercero y no se suman.
+          Los ítems «a cotizar» dependen de un tercero, no tienen cifra y no se suman.
+          Los marcados «por confirmar» sí suman, pero su tasa la confirma el banco o el
+          contador. El precio de la propiedad se muestra aparte de los costos.{" "}
+          {resultado.pendientes > 0
+            ? `Hoy quedan ${resultado.pendientes} ítems a cotizar, así que los costos adicionales reales serán mayores que la cifra de abajo.`
+            : ""}
         </p>
 
         <div className="table-wrap" role="region" aria-label="Desglose de costos" tabIndex={0}>
@@ -140,8 +149,14 @@ export default function CostosCalculator() {
               <tr key={item.id}>
                 <th scope="row">
                   {item.nombre}
-                  <span className={`badge ${item.estado === "confirmado" ? "badge-ok" : "badge-warn"}`}>
-                    {item.estado === "confirmado" ? "Dato propio" : "A cotizar"}
+                  <span
+                    className={`badge ${item.estado === "confirmado" ? "badge-ok" : "badge-warn"}`}
+                  >
+                    {item.estado === "confirmado"
+                      ? "Dato propio"
+                      : item.estado === "estimado"
+                        ? "Por confirmar"
+                        : "A cotizar"}
                   </span>
                   <span className="source">
                     {item.fuente} · {item.fechaDato}
@@ -163,12 +178,16 @@ export default function CostosCalculator() {
 
         <div className="calc-total" aria-live="polite">
           <div>
-            <span className="muted small">Total estimado</span>
-            <strong>{fmtCLP(resultado.totalCLP)}</strong>
+            <span className="muted small">Costos adicionales cuantificados</span>
+            <strong>{fmtCLP(resultado.totalAdicionalesCLP)}</strong>
           </div>
           <div>
             <span className="muted small">Sobre el precio</span>
-            <strong>{sobrePrecio.toFixed(1)}%</strong>
+            <strong>{fmtPct(sobrePrecio)}</strong>
+          </div>
+          <div>
+            <span className="muted small">Precio más esos costos</span>
+            <strong>{fmtCLP(resultado.totalCLP)}</strong>
           </div>
           {conCredito && (
             <div>

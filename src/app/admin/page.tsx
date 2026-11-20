@@ -348,7 +348,7 @@ export default function AdminPage() {
             </form>
 
             <div className="card table-card">
-              <div className="table-wrap">
+              <div className="table-wrap" role="region" tabIndex={0} aria-label="Tabla desplazable">
                 <table className="data-table">
                   <caption className="sr-only">Valores de referencia por comuna</caption>
                   <thead>
@@ -395,7 +395,7 @@ export default function AdminPage() {
 
         {!loading && tab === "publicaciones" && (
           <div className="card table-card">
-            <div className="table-wrap">
+            <div className="table-wrap" role="region" tabIndex={0} aria-label="Tabla desplazable">
               <table className="data-table">
                 <caption className="sr-only">Publicaciones enviadas por anunciantes</caption>
                 <thead>
@@ -458,7 +458,7 @@ export default function AdminPage() {
 
         {!loading && tab === "solicitudes" && (
           <div className="card table-card">
-            <div className="table-wrap">
+            <div className="table-wrap" role="region" tabIndex={0} aria-label="Tabla desplazable">
               <table className="data-table">
                 <caption className="sr-only">Solicitudes de estimación recibidas</caption>
                 <thead>

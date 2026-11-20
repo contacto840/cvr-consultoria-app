@@ -10,7 +10,13 @@
  * herramienta es un cliente que presupuestó mal.
  */
 
-export type EstadoDato = "confirmado" | "pendiente";
+/**
+ * "confirmado": el valor sale de un dato propio o de una tasa legal cierta.
+ * "estimado":   se puede calcular una cifra de referencia, pero la tasa o el
+ *               tope los confirma un tercero. Suma al total, marcada como tal.
+ * "pendiente":  no hay cifra; depende de un prestador. No suma al total.
+ */
+export type EstadoDato = "confirmado" | "estimado" | "pendiente";
 
 export interface ItemCosto {
   id: string;
@@ -46,7 +52,7 @@ export const FECHA_REVISION = "noviembre de 2026";
 export const TIMBRES = {
   tasaMensual: 0.00066, // 0,066% mensual sobre el monto del crédito
   mesesTope: 3, // tope de 90 días
-  estado: "pendiente" as EstadoDato,
+  estado: "estimado" as EstadoDato,
   fuente:
     "Ley sobre Impuesto de Timbres y Estampillas. Tasa de referencia para créditos hipotecarios; el banco informa la tasa y el tope aplicables a cada operación.",
   nota: "{{PENDIENTE: confirmar tasa y tope vigentes con el banco o el contador antes de publicar}}",
@@ -134,7 +140,10 @@ export interface LineaCalculo {
 
 export interface ResultadoCalculo {
   lineas: LineaCalculo[];
+  /** Precio mas los costos adicionales cuantificables. */
   totalCLP: number;
+  /** Solo los costos adicionales, sin el precio de la propiedad. */
+  totalAdicionalesCLP: number;
   pendientes: number;
   montoCreditoCLP: number;
 }
@@ -184,9 +193,14 @@ export function calcularCostos(e: EntradaCalculo): ResultadoCalculo {
   });
 
   const totalCLP = lineas.reduce((acc, l) => acc + (l.montoCLP ?? 0), 0);
+  // El precio no es un costo adicional: separarlo es lo unico que hace util
+  // la cifra que mira el comprador.
+  const totalAdicionalesCLP = lineas
+    .filter((l) => l.item.id !== "precio")
+    .reduce((acc, l) => acc + (l.montoCLP ?? 0), 0);
   const pendientes = lineas.filter((l) => l.montoCLP === null).length;
 
-  return { lineas, totalCLP, pendientes, montoCreditoCLP: montoCredito };
+  return { lineas, totalCLP, totalAdicionalesCLP, pendientes, montoCreditoCLP: montoCredito };
 }
 
 export const fmtCLP = (n: number) =>

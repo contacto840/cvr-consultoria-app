@@ -947,7 +947,10 @@ svg {
 /* ── Calculadora ───────────────────────────────────────────── */
 .calc {
   display: grid;
-  grid-template-columns: 320px 1fr;
+  /* minmax(0, 1fr) y no 1fr: con 1fr la columna toma el ancho minimo de la
+     tabla de costos (min-width 620px) y estira toda la pagina, que es lo que
+     hacia desbordar la calculadora a 375 px. */
+  grid-template-columns: 320px minmax(0, 1fr);
   gap: 24px;
   align-items: start;
 }
@@ -1192,6 +1195,10 @@ svg {
 /* ── Tablas administrativas ────────────────────────────────── */
 .table-wrap {
   width: 100%;
+  /* Sin min-width: 0 el contenedor no puede encogerse por debajo del
+     min-width de su tabla, y el desborde se escapa al layout. */
+  min-width: 0;
+  max-width: 100%;
   overflow-x: auto;
 }
 
@@ -1370,7 +1377,7 @@ svg {
   .split,
   .split-wide,
   .admin-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
   .calc-form,
   .ficha-aside {

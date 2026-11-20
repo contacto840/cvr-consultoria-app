@@ -29,7 +29,7 @@ export const SITE = {
  * hasta que Carlos entregue el número de la sociedad (ver
  * docs/credenciales-publicables.md, regla 6).
  */
-export const LEGAL_LINE = `${SITE.legalName} · RUT {{RUT_PENDIENTE}} · ${SITE.city}, ${SITE.region}`;
+export const LEGAL_LINE = `${SITE.legalName} · RUT 78.342.064-3 · ${SITE.city}, ${SITE.region}`;
 
 export const waLink = (message: string) =>
   `https://wa.me/${SITE.phoneE164}?text=${encodeURIComponent(message)}`;

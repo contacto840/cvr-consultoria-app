@@ -30,7 +30,7 @@ const esc = (s: string) =>
 
 const PIE = `
   <p style="margin:0;font-size:11px;color:#4a6080;line-height:1.8;">
-    ${SITE.legalName} · RUT {{RUT_PENDIENTE}}<br>
+    ${SITE.legalName} · RUT 78.342.064-3<br>
     ${SITE.city}, ${SITE.region}, Chile<br>
     ${SITE.email} · ${SITE.phoneDisplay}
   </p>`;

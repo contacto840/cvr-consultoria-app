@@ -312,7 +312,7 @@ export async function generateTasacionPDF(data: EstimacionData): Promise<Uint8Ar
     font: bold,
     color: GOLD,
   });
-  page.drawText("CVR Propiedades SpA · RUT {{RUT_PENDIENTE}} · Chillán, Región de Ñuble", {
+  page.drawText("CVR Propiedades SpA · RUT 78.342.064-3 · Chillán, Región de Ñuble", {
     x: 30,
     y: y - 12,
     size: 7.5,
@@ -326,7 +326,7 @@ export async function generateTasacionPDF(data: EstimacionData): Promise<Uint8Ar
 
   // ── PIE ─────────────────────────────────────────────────────
   rect(page, 0, 0, W, 30, NAVY);
-  page.drawText("CVR Propiedades SpA · RUT {{RUT_PENDIENTE}} · cvrpropiedades.cl", {
+  page.drawText("CVR Propiedades SpA · RUT 78.342.064-3 · cvrpropiedades.cl", {
     x: 30,
     y: 12,
     size: 7,

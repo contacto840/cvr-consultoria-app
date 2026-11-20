@@ -38,7 +38,7 @@ export default function PrivacidadPage() {
           <h2>1. Responsable del tratamiento</h2>
           <p>
             El responsable es <strong>{SITE.legalName}</strong>, RUT{" "}
-            <strong>{"{{RUT_PENDIENTE}}"}</strong>, con domicilio en {SITE.city},{" "}
+            <strong>{"78.342.064-3"}</strong>, con domicilio en {SITE.city},{" "}
             {SITE.region}, Chile. Canal de contacto para materias de datos personales:{" "}
             <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.
           </p>
@@ -52,7 +52,7 @@ export default function PrivacidadPage() {
             datos sensibles y no usamos los datos para publicidad de terceros.
           </p>
 
-          <div className="table-wrap">
+          <div className="table-wrap" role="region" tabIndex={0} aria-label="Datos que se tratan y con que finalidad, tabla desplazable">
             <table className="data-table">
               <caption className="sr-only">
                 Datos personales tratados, finalidad, base de licitud y conservación
