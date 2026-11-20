@@ -98,6 +98,41 @@ Verificable, en todas las páginas:
 - No toques el repositorio `cvr_consultoria_app`. Es otro encargo.
 - **No despliegues, no hagas push, no borres nada fuera del alcance.** Trabajas en un worktree aislado. Publicar lo decide Carlos.
 
+## Credenciales y cifras: usa solo el archivo curado
+
+Las credenciales académicas de Carlos y las reglas para redactarlas están en `C:\Users\carlo\Desktop\cvr_consultoria_app\docs\credenciales-publicables.md`. **Es tu única fuente.** Léelo completo antes de escribir la página "Quién firma" o cualquier mención a formación o experiencia.
+
+**No entres a `C:\Users\carlo\Desktop\certificaciones y diplomas` ni a `C:\Users\carlo\Desktop\Credenciales_2026`.** Contienen certificado de antecedentes, certificado de nacimiento, hoja de vida del conductor, declaración de renta y el RUN personal de Carlos. No los abras, no los copies, no los referencies.
+
+Tres reglas de ese archivo que te repito porque son las que más fácil se incumplen:
+
+1. **Nunca "23 años de experiencia inmobiliaria"**, ni variantes. Los 23 años son de trayectoria en el servicio público, no de tasación. Su formación en tasación parte en 2022.
+2. **Nunca "Perito Tasador Certificado".** Usa la fórmula verificable del archivo curado.
+3. **El Diplomado en Derecho Inmobiliario de la UNAB va como "en curso"**, porque el respaldo es un certificado de alumno regular, no de egreso.
+
+## Casos y testimonios: anonimizados, y verdaderos
+
+Carlos no publica casos de clientes identificables; sus clientes son privados y eso no se negocia. Reglas:
+
+- **Caso anonimizado:** admitido si los hechos son reales y los datos están alterados de modo que no se pueda reidentificar a nadie. No basta con quitar el nombre: cambia o agrupa la comuna, el rol de avalúo, la superficie exacta, los montos exactos y las fechas exactas. Si en Chillán hubo un solo juicio de partición de un predio de 4,2 hectáreas en 2025, decir "un predio de 4,2 ha en Chillán, 2025" identifica al cliente aunque no lleve nombre.
+- **Ejemplo construido:** admitido, pero **rotulado visiblemente como ejemplo**. No se presenta un caso inventado como si fuera real.
+- **Testimonios:** no redactes ninguno. Si encuentras testimonios en el código sin evidencia de ser reales y autorizados, elimínalos y anótalo.
+- Prohibido cualquier dato que provenga de un informe pericial real: direcciones, roles, nombres de partes, números de causa, montos de avalúo. Eso está bajo deber de reserva.
+
+## Medidas legales de protección
+
+Carlos pidió expresamente las medidas que protejan a la empresa y a los sitios. Implementa:
+
+1. **Política de privacidad conforme a la Ley 21.719** de protección de datos personales. `privacidad.html` ya existe y fue trabajado; revísalo y complétalo con lo que falte: identificación del responsable (CVR Propiedades SpA), finalidad de cada dato recogido, base de licitud, plazo de conservación, destinatarios, y los derechos del titular (acceso, rectificación, supresión, oposición y portabilidad) con el canal concreto para ejercerlos.
+2. **Términos de uso**, página nueva `terminos.html`, enlazada desde el pie: alcance de la información del sitio, que las herramientas interactivas son referenciales y no constituyen tasación ni asesoría legal, limitación de responsabilidad, propiedad intelectual del contenido, y ley aplicable y jurisdicción chilenas.
+3. **Descargo en cada módulo interactivo**, visible sin desplazar, no al final: resultado referencial, no sustituye un informe firmado, no sirve para trámites bancarios, judiciales ni de compraventa.
+4. **Consentimiento explícito en los formularios:** casilla no pre-marcada, con la finalidad declarada y enlace a la política de privacidad. Sin casillas marcadas por omisión y sin consentimientos agrupados.
+5. **Minimiza la recolección.** Pide solo lo necesario para responder una consulta. No pidas RUT, dirección ni fecha de nacimiento en un formulario de contacto.
+6. **Nada de analítica de terceros, nada de píxeles de redes sociales, nada de cookies no esenciales.** Si no hay cookies no esenciales no se necesita banner de consentimiento, y es la opción más limpia y más privada. No agregues ninguna.
+7. **Deber de reserva**, una línea en la página "Quién firma": la información de los encargos está sujeta a reserva profesional y no se divulga.
+
+Anota en tu informe todo lo que implementaste en este punto. Esto lo tiene que revisar la abogada de Carlos antes de publicar; tú dejas el texto redactado y señalado como pendiente de revisión legal, no lo das por cerrado.
+
 ## Qué entregar
 
 En tu rama, dentro del worktree:

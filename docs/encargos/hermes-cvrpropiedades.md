@@ -136,6 +136,45 @@ Carlos trabaja bajo NCh 3658/1:2021, NCh 3658/2:2022 e IVS 2025, y tiene los PDF
 - No toques el repositorio `cvr-website`. Es otro encargo.
 - **No despliegues, no hagas push, no borres nada fuera del alcance.** Trabajas en un worktree aislado. Publicar lo decide Carlos.
 
+## Credenciales y cifras: usa solo el archivo curado
+
+Las credenciales académicas de Carlos y las reglas para redactarlas están en `docs/credenciales-publicables.md` de este mismo repositorio. **Es tu única fuente.** Léelo completo antes de escribir cualquier mención a formación o experiencia.
+
+**No entres a `C:\Users\carlo\Desktop\certificaciones y diplomas` ni a `C:\Users\carlo\Desktop\Credenciales_2026`.** Contienen certificado de antecedentes, certificado de nacimiento, hoja de vida del conductor, declaración de renta y el RUN personal de Carlos. No los abras, no los copies, no los referencies.
+
+Tres reglas de ese archivo que te repito porque son las que más fácil se incumplen:
+
+1. **El texto actual "Más de 20 años asegurando inversiones inmobiliarias" se elimina.** Los 23 años de trayectoria de Carlos son de servicio público, no de tasación ni de corretaje. Su formación inmobiliaria parte en 2022. No lo reemplaces por "23 años" ni por ninguna variante que insinúe experiencia inmobiliaria de esa extensión.
+2. **Nunca "Perito Tasador Certificado".** Usa la fórmula verificable del archivo curado.
+3. **El Diplomado en Derecho Inmobiliario de la UNAB va como "en curso"**, porque el respaldo es un certificado de alumno regular, no de egreso.
+
+En lugar de una cifra de años, la credibilidad de este sitio se construye con las credenciales por nombre, institución y año, que el archivo curado lista y que un cliente puede verificar.
+
+## Casos y testimonios: anonimizados, y verdaderos
+
+Carlos no publica casos de clientes identificables; sus clientes son privados y eso no se negocia. La sección "Lo que dicen nuestros clientes" de `src/app/page.tsx` se elimina salvo que encuentres evidencia de que los testimonios son reales y autorizados por escrito, lo que es improbable. No redactes testimonios nuevos.
+
+Si construyes casos para ilustrar un servicio:
+
+- **Caso anonimizado:** admitido si los hechos son reales y los datos están alterados de modo que no se pueda reidentificar a nadie. No basta quitar el nombre: cambia o agrupa la comuna, el rol de avalúo, la superficie exacta, los montos exactos y las fechas exactas.
+- **Ejemplo construido:** admitido, pero **rotulado visiblemente como ejemplo**. No se presenta un caso inventado como si fuera real.
+- Prohibido cualquier dato que provenga de un encargo real: direcciones, roles, nombres de partes, números de causa, montos.
+
+## Medidas legales de protección
+
+Carlos pidió expresamente las medidas que protejan a la empresa y a los sitios. Implementa:
+
+1. **Política de privacidad conforme a la Ley 21.719** de protección de datos personales, como ruta propia. Este sitio recoge más datos que el otro —nombre, correo, teléfono y datos de la propiedad en el formulario de tasación, además de los pagos— así que la política tiene que ser precisa: identificación del responsable (CVR Propiedades SpA), finalidad de cada dato, base de licitud, plazo de conservación, destinatarios (menciona MercadoPago como procesador de pagos y el servicio de correo), transferencias si las hay, y los derechos del titular (acceso, rectificación, supresión, oposición y portabilidad) con el canal concreto para ejercerlos.
+2. **Términos de uso**, ruta propia enlazada desde el pie: alcance de la información, que las herramientas interactivas son referenciales y no constituyen tasación ni asesoría legal ni financiera, condiciones del servicio pagado (qué incluye, plazo, política de reembolso), limitación de responsabilidad, propiedad intelectual, y ley aplicable y jurisdicción chilenas.
+3. **Descargo en cada módulo interactivo y en el estimador de valor**, visible sin desplazar: resultado referencial, no sustituye un informe firmado, no sirve para trámites bancarios, judiciales ni de compraventa.
+4. **Consentimiento explícito en los formularios:** casilla no pre-marcada, con la finalidad declarada y enlace a la política de privacidad. Esto es especialmente importante en el formulario de tasación, que recoge datos de contacto y de un inmueble.
+5. **Minimiza la recolección.** Revisa el modelo `TasacionRequest`: si algún campo no es necesario para prestar el servicio, deja de pedirlo. Propón en el informe los campos que sobran; no migres la base por tu cuenta.
+6. **Nada de analítica de terceros, nada de píxeles de redes sociales, nada de cookies no esenciales.** Si no hay cookies no esenciales no se necesita banner de consentimiento. No agregues ninguna.
+7. **Protege los datos ya almacenados:** la base contiene nombres, correos y teléfonos de solicitantes reales. Verifica que ninguna ruta de API los exponga sin autenticación. Revisa en particular `src/app/api/admin/route.ts` y `src/app/api/seed/route.ts`. Si una ruta devuelve datos personales sin autenticar, es una filtración y se corrige en este encargo: dilo en el informe con el detalle.
+8. **Fichas de propiedad:** el modelo `PropertyListing` tiene `address`, `contactName`, `contactPhone` y `contactEmail`. Decide y documenta qué se muestra en público. La dirección exacta de una propiedad habitada y el teléfono personal de un propietario no van en una página pública indexable: muestra sector y comuna, y canaliza el contacto por un formulario.
+
+Anota en tu informe todo lo que implementaste en este punto. Esto lo tiene que revisar la abogada de Carlos antes de publicar; tú dejas el texto redactado y señalado como pendiente de revisión legal, no lo das por cerrado.
+
 ## Qué entregar
 
 En tu rama, dentro del worktree:
