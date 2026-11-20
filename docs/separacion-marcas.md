@@ -127,6 +127,40 @@ Pediste mejorar lo visual, subir el estándar y hacer páginas interactivas y ed
 
 ---
 
+## 5 bis. Hallazgo grave, anterior a cualquier mejora visual
+
+Revisando el Next.js encontré algo que importa más que la separación de marcas.
+
+`src/lib/pdf-generator.ts` emite automáticamente un PDF que:
+
+1. se titula **"INFORME OFICIAL DE TASACIÓN"**;
+2. afirma haber sido *"elaborado bajo los criterios de la Norma Chilena NCh 3658 de Tasación de Bienes"*;
+3. imprime un bloque de firma con **"Carlos Vivanco R. — Perito Tasador Certificado"**;
+4. y en el cuerpo dice que los valores son referenciales y *"no reemplazan una tasación formal in situ"*.
+
+Ese documento sale de una consulta a una tabla de valores por comuna. Sin inspección, sin homologación de comparables, sin que lo revise nadie. Las cuatro afirmaciones no pueden ser verdad al mismo tiempo, y la segunda y la tercera simplemente no lo son.
+
+**Por qué es grave y no un detalle de redacción:** Carlos declara como perito en causas civiles en curso. Un documento auto-emitido, con su firma impresa, titulado "oficial" e invocando una norma que no se aplicó, es exactamente lo que una contraparte necesita para atacar su credibilidad. No tiene que probar que ese PDF específico está mal: basta mostrar que el sitio del perito emite informes "oficiales" automáticos para poner en duda todo lo que firme. Y el daño alcanza a causas en las que ese PDF nunca intervino.
+
+**Corrección, antes de cualquier mejora visual:** el PDF pasa a llamarse "Estimación referencial de valor", se le quita la mención a NCh 3658 y se reemplaza por la descripción exacta de lo que sí se hizo (valores de referencia por comuna, con su año y tamaño de muestra, datos que ya están en la base), se le quita el bloque de firma, y el descargo sube al encabezado en vez de quedar enterrado al final. Lo que el cliente paga pasa a ser un encargo de tasación que tú ejecutas a mano, con plazo, no una descarga automática.
+
+Decir con precisión lo que se hizo da más credibilidad que invocar una norma. Un comprador que lee "valores de referencia de 2025 para su comuna, muestra de N casos" entiende qué compró. Uno que lee "informe oficial bajo NCh 3658" y después descubre que nadie fue a ver la casa, no vuelve.
+
+---
+
+## 5 ter. Las normas no se pueden reproducir en el sitio
+
+Tienes los PDF en `C:\Users\carlo\Downloads\Normas INN`. Dos cosas:
+
+- La copia de **NCh 3658/1:2021** es una licencia de un solo usuario emitida a nombre de **Transsa Consultores Inmobiliarios SpA**, no a CVR. Prohíbe expresamente la reproducción y la publicación en internet.
+- **IVS 2025** trae la misma cláusula del IVSC: ninguna parte puede reproducirse sin permiso escrito.
+
+Aplicar las normas en tu trabajo es tuyo y nadie lo discute. Copiar su texto a un sitio público es otra cosa. Así que los sitios las citan por número y título, como referencia bibliográfica, y explican los conceptos con palabras propias. Los tres enfoques de tasación (comparación, costo, ingreso) son conceptos del oficio y se explican libremente.
+
+Queda prohibido en los dos encargos, y lo audito: ninguna cita normativa inventada. Atribuir a una norma una cláusula o una exigencia que no dice es peor que no citarla.
+
+---
+
 ## 6. Reparto del trabajo
 
 | Quién | Qué |
@@ -144,6 +178,14 @@ Pediste mejorar lo visual, subir el estándar y hacer páginas interactivas y ed
 1. El reparto de la sección 2.
 2. Las marcas de la sección 3.
 3. Si "más de 20 años" y los testimonios del sitio actual son reales.
-4. Los precios que se publican, si alguno.
-5. El RUT de la SpA, para los pies legales.
-6. Cuándo se publica cada sitio.
+4. Cuál es tu calificación profesional exacta y verificable, para reemplazar "Perito Tasador Certificado".
+5. Los precios y honorarios que se publican, si alguno.
+6. El RUT de la SpA, para los pies legales.
+7. Cuándo se publica cada sitio.
+
+## 8. Estado del trabajo
+
+- Encargo para `cvrtasaciones.cl`: escrito, en `docs/encargos/hermes-cvrtasaciones.md`.
+- Encargo para `cvrpropiedades.cl`: escrito, en `docs/encargos/hermes-cvrpropiedades.md`.
+- Ninguno lanzado todavía. Esperan el visto bueno de las secciones 2 y 3, porque todo el contenido que escriba Hermes depende del reparto.
+- Nada desplegado, nada publicado, ningún `push`.
