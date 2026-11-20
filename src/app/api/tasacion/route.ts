@@ -2,35 +2,103 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { UF_VALUE_CLP } from "@/lib/seed-data";
 
+const TIPOS = new Set(["casa", "departamento", "terreno", "agricola"]);
+const CONDICIONES = new Set(["excelente", "bueno", "normal", "regular", "malo"]);
+
+const FACTOR_CONDICION: Record<string, number> = {
+  excelente: 1.2,
+  bueno: 1.05,
+  normal: 1.0,
+  regular: 0.88,
+  malo: 0.75,
+};
+
+function factorEdad(anios: number): number {
+  if (anios <= 5) return 1.1;
+  if (anios <= 15) return 1.0;
+  if (anios <= 30) return 0.9;
+  return 0.8;
+}
+
+function texto(value: unknown, max: number): string {
+  return typeof value === "string" ? value.trim().slice(0, max) : "";
+}
+
+const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/**
+ * POST /api/tasacion — estimación referencial.
+ *
+ * No es una tasación: calcula un rango a partir de valores de referencia por
+ * comuna, sector y tipo, guarda la solicitud y devuelve la muestra y el año de
+ * los datos para que el resultado sea auditable.
+ */
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    const { clientName, clientEmail, clientPhone, comuna, sector, propertyType, surface, condition, age } = body;
-
-    // Validaciones básicas
-    if (!clientName || !clientEmail || !clientPhone || !comuna || !propertyType || !surface) {
-      return NextResponse.json({ ok: false, error: "Todos los campos son requeridos." }, { status: 400 });
+    const body = (await req.json().catch(() => null)) as Record<string, unknown> | null;
+    if (!body) {
+      return NextResponse.json({ ok: false, error: "Solicitud inválida." }, { status: 400 });
     }
-    if (surface <= 0 || surface > 100000) {
+
+    if (body.consentimiento !== true) {
+      return NextResponse.json(
+        { ok: false, error: "Debes autorizar el tratamiento de tus datos para calcular." },
+        { status: 400 }
+      );
+    }
+
+    const clientName = texto(body.clientName, 120);
+    const clientEmail = texto(body.clientEmail, 160);
+    const clientPhone = texto(body.clientPhone, 40);
+    const comuna = texto(body.comuna, 80);
+    const sector = texto(body.sector, 80);
+    const propertyType = texto(body.propertyType, 20);
+    const condition = texto(body.condition, 20) || "normal";
+
+    if (!clientName || clientName.length < 2) {
+      return NextResponse.json({ ok: false, error: "Indica tu nombre." }, { status: 400 });
+    }
+    if (!EMAIL.test(clientEmail)) {
+      return NextResponse.json({ ok: false, error: "El correo no es válido." }, { status: 400 });
+    }
+    if (clientPhone.replace(/\D/g, "").length < 8) {
+      return NextResponse.json({ ok: false, error: "El teléfono no es válido." }, { status: 400 });
+    }
+    if (!comuna) {
+      return NextResponse.json({ ok: false, error: "Indica la comuna." }, { status: 400 });
+    }
+    if (!TIPOS.has(propertyType)) {
+      return NextResponse.json({ ok: false, error: "Tipo de propiedad inválido." }, { status: 400 });
+    }
+    if (!CONDICIONES.has(condition)) {
+      return NextResponse.json({ ok: false, error: "Estado de conservación inválido." }, { status: 400 });
+    }
+
+    const superficieIngresada = Number(body.surface);
+    if (!Number.isFinite(superficieIngresada) || superficieIngresada <= 0) {
       return NextResponse.json({ ok: false, error: "Superficie inválida." }, { status: 400 });
     }
+    // Los predios agrícolas se ingresan en hectáreas; el resto en m².
+    const surface = propertyType === "agricola" ? superficieIngresada * 10000 : superficieIngresada;
+    if (surface > 100_000_000) {
+      return NextResponse.json({ ok: false, error: "Superficie fuera de rango." }, { status: 400 });
+    }
 
-    // Buscar datos de referencia: primero por sector específico, luego sin sector
-    const sectorStr = sector ?? "";
-    let refData = sectorStr
+    const edadNum = Number(body.age);
+    const edad = Number.isFinite(edadNum) && edadNum >= 0 && edadNum <= 120 ? Math.round(edadNum) : 0;
+
+    let refData = sector
       ? await prisma.propertyData.findUnique({
-          where: { comuna_sector_propertyType: { comuna, sector: sectorStr, propertyType } },
+          where: { comuna_sector_propertyType: { comuna, sector, propertyType } },
         })
       : null;
 
-    // Fallback: registro sin sector (sector = "")
     if (!refData) {
       refData = await prisma.propertyData.findUnique({
         where: { comuna_sector_propertyType: { comuna, sector: "", propertyType } },
       });
     }
 
-    // Último fallback: cualquier registro de esa comuna y tipo
     if (!refData) {
       refData = await prisma.propertyData.findFirst({
         where: { comuna, propertyType },
@@ -40,49 +108,36 @@ export async function POST(req: NextRequest) {
 
     if (!refData) {
       return NextResponse.json(
-        { ok: false, error: `No tenemos datos de referencia para ${propertyType} en ${comuna}. Contáctenos para una tasación manual.` },
+        {
+          ok: false,
+          error: `No hay valores de referencia para ese tipo de propiedad en ${comuna}. Escríbenos y lo revisamos a mano.`,
+        },
         { status: 404 }
       );
     }
 
-    // ─── MOTOR DE CÁLCULO ─────────────────────────────────────
-    let basePrice = refData.avgPricePerM2;
+    const fCondicion = FACTOR_CONDICION[condition] ?? 1;
+    const fEdad =
+      propertyType === "casa" || propertyType === "departamento" ? factorEdad(edad) : 1;
 
-    // Factor por condición del inmueble
-    const conditionFactor: Record<string, number> = {
-      excelente: 1.20,
-      bueno: 1.05,
-      normal: 1.00,
-      regular: 0.88,
-      malo: 0.75,
-    };
-    basePrice *= conditionFactor[condition] ?? 1.0;
-
-    // Factor por antigüedad (solo casas y departamentos)
-    if (propertyType === "casa" || propertyType === "departamento") {
-      const ageNum = parseInt(age ?? "0", 10);
-      if (ageNum <= 5) basePrice *= 1.10;
-      else if (ageNum <= 15) basePrice *= 1.00;
-      else if (ageNum <= 30) basePrice *= 0.90;
-      else basePrice *= 0.80;
-    }
-
-    const estimatedValueUF = Math.round(basePrice * surface * 100) / 100;
+    const precioM2 = refData.avgPricePerM2 * fCondicion * fEdad;
+    const estimatedValueUF = Math.round(precioM2 * surface * 100) / 100;
     const estimatedValueCLP = Math.round(estimatedValueUF * UF_VALUE_CLP);
-    const minValueUF = Math.round((refData.minPricePerM2 ?? basePrice * 0.8) * surface * 100) / 100;
-    const maxValueUF = Math.round((refData.maxPricePerM2 ?? basePrice * 1.2) * surface * 100) / 100;
+    const minValueUF =
+      Math.round((refData.minPricePerM2 ?? refData.avgPricePerM2 * 0.85) * surface * 100) / 100;
+    const maxValueUF =
+      Math.round((refData.maxPricePerM2 ?? refData.avgPricePerM2 * 1.15) * surface * 100) / 100;
 
-    // Guardar la solicitud en BD
     const record = await prisma.tasacionRequest.create({
       data: {
         clientName,
         clientEmail,
         clientPhone,
         comuna,
-        sector: sectorStr,
+        sector,
         propertyType,
-        surface: parseFloat(surface),
-        condition: condition ?? "normal",
+        surface,
+        condition,
         estimatedValueUF,
         estimatedValueCLP,
         paymentStatus: "pending",
@@ -97,15 +152,18 @@ export async function POST(req: NextRequest) {
         estimatedValueCLP,
         minValueUF,
         maxValueUF,
-        pricePerM2UF: Math.round(basePrice * 100) / 100,
+        pricePerM2UF: Math.round(precioM2 * 100) / 100,
         comuna,
-        sector: sectorStr,
+        sector,
         propertyType,
-        surface: parseFloat(surface),
-        condition: condition ?? "normal",
+        surface,
+        condition,
         ufValueCLP: UF_VALUE_CLP,
         referenceYear: refData.referenceYear,
         usedSector: refData.sector,
+        sampleSize: refData.sampleSize,
+        conditionFactor: fCondicion,
+        ageFactor: fEdad,
       },
     });
   } catch (error) {
@@ -114,12 +172,12 @@ export async function POST(req: NextRequest) {
   }
 }
 
+// GET: comunas con datos de referencia. No devuelve datos personales.
 export async function GET() {
   const rows = await prisma.propertyData.findMany({
-    select: { comuna: true, sector: true, propertyType: true },
+    select: { comuna: true },
     distinct: ["comuna"],
     orderBy: { comuna: "asc" },
   });
-  const communas = [...new Set(rows.map((r) => r.comuna))];
-  return NextResponse.json({ ok: true, data: communas });
+  return NextResponse.json({ ok: true, data: rows.map((r) => r.comuna) });
 }

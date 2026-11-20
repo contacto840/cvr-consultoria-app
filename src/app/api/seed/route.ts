@@ -1,8 +1,29 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { adminConfigurado, esAdmin } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
 import { SEED_DATA } from "@/lib/seed-data";
 
-export async function POST() {
+/**
+ * Carga de datos de referencia.
+ *
+ * Antes, `POST /api/seed` era alcanzable sin autenticación: cualquiera podía
+ * reescribir los precios por m² con los que se calcula la estimación pública.
+ * Ahora exige la misma credencial del panel de administración y falla cerrado si
+ * `ADMIN_PASSWORD` no está configurada.
+ */
+export async function POST(req: NextRequest) {
+  if (!esAdmin(req)) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: adminConfigurado()
+          ? "No autorizado"
+          : "ADMIN_PASSWORD no está configurada en el entorno.",
+      },
+      { status: 401 }
+    );
+  }
+
   try {
     let upserted = 0;
 
@@ -47,7 +68,12 @@ export async function POST() {
   }
 }
 
-export async function GET() {
+// Solo agregados: no devuelve datos personales.
+export async function GET(req: NextRequest) {
+  if (!esAdmin(req)) {
+    return NextResponse.json({ ok: false, error: "No autorizado" }, { status: 401 });
+  }
+
   const [total, porComuna] = await Promise.all([
     prisma.propertyData.count(),
     prisma.propertyData.groupBy({
@@ -56,5 +82,6 @@ export async function GET() {
       orderBy: { comuna: "asc" },
     }),
   ]);
+
   return NextResponse.json({ ok: true, totalRecords: total, porComuna });
 }

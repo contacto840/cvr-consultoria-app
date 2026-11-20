@@ -2,21 +2,25 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { SECTORS_BY_COMMUNE } from "@/lib/seed-data";
 
-// GET /api/sectores?comuna=Chillán
-// Returns sectors for a commune and avg prices per property type
+const TIPOS = new Set(["casa", "departamento", "terreno", "agricola"]);
+
+// GET /api/sectores?comuna=Chillán&tipo=casa
+// Devuelve sectores de una comuna y, si se pide el tipo, precios agregados.
+// No expone datos personales: solo valores de referencia.
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const comuna = searchParams.get("comuna");
-  const propertyType = searchParams.get("tipo");
+  const comuna = searchParams.get("comuna")?.trim().slice(0, 80) ?? "";
+  const propertyType = searchParams.get("tipo")?.trim() ?? "";
 
   if (!comuna) {
     return NextResponse.json({ error: "Parámetro 'comuna' requerido" }, { status: 400 });
   }
+  if (propertyType && !TIPOS.has(propertyType)) {
+    return NextResponse.json({ error: "Tipo de propiedad inválido" }, { status: 400 });
+  }
 
-  // Get sectors from static map (fast, no DB)
   const sectors = SECTORS_BY_COMMUNE[comuna] ?? [];
 
-  // If propertyType is also requested, return prices per sector
   if (propertyType) {
     const priceData = await prisma.propertyData.findMany({
       where: {

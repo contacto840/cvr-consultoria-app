@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
+import JsonLd from "@/components/json-ld";
+import { SITE } from "@/lib/site";
 import "./globals.css";
 
 // Self-hosted via next/font (downloaded at build time). Exposed as CSS variables
@@ -18,88 +20,58 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "CVR Consultoría Predial | Auditoría Técnica y Legal — Ñuble, Chile",
-  description:
-    "Más de 20 años asegurando inversiones inmobiliarias e industriales en la Región de Ñuble. Due Diligence técnico, Estudio de Títulos, Tasaciones Comerciales y Auditoría Predial.",
-  keywords:
-    "tasación inmobiliaria Chillán, due diligence Ñuble, estudio de títulos Chile, perito tasador Chillán, consultoría predial Ñuble",
-  openGraph: {
-    title: "CVR Consultoría Predial | No somos corredores. Somos tu filtro de riesgo.",
-    description:
-      "Auditoría técnica y legal para inversiones inmobiliarias en la Región de Ñuble, Chile.",
-    locale: "es_CL",
-    type: "website",
+  metadataBase: new URL(SITE.domain),
+  title: {
+    default: "CVR Propiedades — Corretaje en Chillán y Región de Ñuble",
+    template: "%s | CVR Propiedades",
   },
+  description:
+    "Venta, arriendo y asesoría de compra de propiedades en Chillán y la Región de Ñuble. Revisión técnica y legal del inmueble antes de firmar.",
+  applicationName: SITE.name,
+  authors: [{ name: SITE.legalName, url: SITE.domain }],
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    locale: "es_CL",
+    url: SITE.domain,
+    siteName: SITE.name,
+    title: "CVR Propiedades — Corretaje en Chillán y Región de Ñuble",
+    description:
+      "Venta, arriendo y asesoría de compra de propiedades en Chillán y la Región de Ñuble.",
+  },
+  robots: { index: true, follow: true },
 };
 
-const jsonLd = {
+// RealEstateAgent describe el negocio, no un servicio puntual. No lleva precios
+// ni promesas de validez: eso se declara en cada página de servicio.
+const organizationLd = {
   "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "LocalBusiness",
-      "@id": "https://cvrpropiedades.com",
-      "name": "CVR Consultoría Predial",
-      "description": "Auditoría técnica y legal para inversiones inmobiliarias en la Región de Ñuble. Due Diligence, Estudio de Títulos y Tasaciones Comerciales.",
-      "url": "https://cvrpropiedades.com",
-      "telephone": "+56912345678",
-      "email": "contacto@cvrpropiedades.com",
-      "address": {
-        "@type": "PostalAddress",
-        "addressLocality": "Chillán",
-        "addressRegion": "Región de Ñuble",
-        "addressCountry": "CL",
-      },
-      "geo": {
-        "@type": "GeoCoordinates",
-        "latitude": -36.6067,
-        "longitude": -72.1034,
-      },
-      "openingHoursSpecification": {
-        "@type": "OpeningHoursSpecification",
-        "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-        "opens": "09:00",
-        "closes": "18:00",
-      },
-      "priceRange": "$$",
-      "areaServed": "Región de Ñuble, Chile",
-      "hasOfferCatalog": {
-        "@type": "OfferCatalog",
-        "name": "Servicios de Consultoría Predial",
-        "itemListElement": [
-          {
-            "@type": "Offer",
-            "itemOffered": {
-              "@type": "Service",
-              "name": "Tasación Referencial Online",
-              "description": "Valorización automática de propiedades en la Región de Ñuble",
-            },
-            "price": "0",
-            "priceCurrency": "CLP",
-          },
-          {
-            "@type": "Offer",
-            "itemOffered": {
-              "@type": "Service",
-              "name": "Informe Oficial de Tasación con firma de Perito",
-              "description": "Tasación con validez legal para bancos, notarías y tribunales",
-            },
-            "price": "15000",
-            "priceCurrency": "CLP",
-          },
-        ],
-      },
-    },
-    {
-      "@type": "WebSite",
-      "url": "https://cvrpropiedades.com",
-      "name": "CVR Consultoría Predial",
-      "potentialAction": {
-        "@type": "SearchAction",
-        "target": "https://cvrpropiedades.com/tasacion",
-        "query-input": "required name=search_term_string",
-      },
-    },
+  "@type": "RealEstateAgent",
+  "@id": `${SITE.domain}/#organization`,
+  name: SITE.name,
+  legalName: SITE.legalName,
+  url: SITE.domain,
+  email: SITE.email,
+  telephone: `+${SITE.phoneE164}`,
+  description:
+    "Corretaje de propiedades en la Región de Ñuble: venta, arriendo, administración y asesoría de compra con revisión técnica y legal del inmueble.",
+  address: {
+    "@type": "PostalAddress",
+    addressLocality: SITE.city,
+    addressRegion: SITE.region,
+    addressCountry: SITE.country,
+  },
+  areaServed: {
+    "@type": "AdministrativeArea",
+    name: SITE.region,
+  },
+  knowsAbout: [
+    "Corretaje de propiedades",
+    "Compraventa de inmuebles",
+    "Arriendo y administración de propiedades",
+    "Revisión de títulos",
   ],
+  sameAs: [SITE.tasacionesUrl],
 };
 
 export default function RootLayout({
@@ -108,14 +80,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className={`${inter.variable} ${playfair.variable}`}>
-      <head>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
-      </head>
+    <html lang="es-CL" className={`${inter.variable} ${playfair.variable}`}>
       <body>
+        <JsonLd data={organizationLd} />
         {children}
       </body>
     </html>
