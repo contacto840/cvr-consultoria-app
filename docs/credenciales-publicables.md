@@ -59,8 +59,10 @@ Su formación en tasación empieza en 2022 y se consolida en 2026. Presentar 23 
 ### 5. Nada de datos personales en los sitios
 No va el RUN de Carlos, ni su domicilio particular, ni su cargo o institución de trabajo actual, ni ningún certificado de identidad o de antecedentes. El único identificador tributario que aparece es el **RUT de CVR Propiedades SpA**, en el pie legal.
 
-### 6. El RUT de la SpA sigue pendiente
-Los documentos revisados no lo contienen: el estatuto muestra el RUN del accionista y el certificado de inicio de actividades muestra el RUT del propietario del inmueble de la dirección, que es un tercero. Ninguno de los dos es el RUT de la sociedad y **ninguno de los dos se publica**. Deja `{{RUT_PENDIENTE}}` hasta que Carlos entregue el número.
+### 6. RUT de la SpA: **78.342.064-3**
+Confirmado por Carlos el 20 de noviembre de 2026. Es el que ya estaba en el pie del sitio original; dígito verificador comprobado con módulo 11.
+
+Este es el **único** identificador tributario que se publica. No se usan ni se publican los otros números que aparecen en los documentos de respaldo: el estatuto muestra el RUN personal de Carlos como accionista, y el certificado de inicio de actividades muestra el RUT del propietario del inmueble de la dirección, que es un tercero.
 
 ### 7. Inscripción como perito judicial: por confirmar
 En Chile la inscripción en la lista de peritos de la Corte de Apelaciones es la credencial más fuerte para la línea pericial. No apareció en los respaldos. Si Carlos está inscrito en la Corte de Apelaciones de Chillán, se publica con ese nombre exacto. Si no lo está, **no se insinúa**: se puede decir que emite informes periciales para causas judiciales, que es lo que hace, sin afirmar una inscripción que no tiene. Deja `{{PENDIENTE: inscripción en lista de peritos, confirmar con Carlos}}`.
