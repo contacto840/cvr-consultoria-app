@@ -1,16 +1,33 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { useCallback, useState } from "react";
 
 interface PropertyData {
   id: string;
   comuna: string;
+  sector: string;
   propertyType: string;
   avgPricePerM2: number;
   minPricePerM2: number | null;
   maxPricePerM2: number | null;
   referenceYear: number;
+}
+
+interface ListingRecord {
+  id: string;
+  title: string;
+  comuna: string;
+  sector: string;
+  propertyType: string;
+  transactionType: string;
+  priceUF: number;
+  status: string;
+  isActive: boolean;
+  createdAt: string;
+  contactName: string;
+  contactPhone: string;
+  contactEmail: string;
 }
 
 interface TasacionRecord {
@@ -27,63 +44,88 @@ interface TasacionRecord {
   createdAt: string;
 }
 
-const TYPE_LABELS: Record<string, string> = {
-  casa: "🏠 Casa",
-  departamento: "🏢 Depto.",
-  terreno: "🌿 Terreno",
-  agricola: "🌾 Agrícola",
+const TIPO: Record<string, string> = {
+  casa: "Casa",
+  departamento: "Departamento",
+  terreno: "Terreno",
+  agricola: "Agrícola",
 };
 
 const fmtUF = (n: number) => n.toLocaleString("es-CL", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 const fmtCLP = (n: number) => `$${n.toLocaleString("es-CL", { maximumFractionDigits: 0 })}`;
-const fmtDate = (s: string) => new Date(s).toLocaleDateString("es-CL", { day: "2-digit", month: "short", year: "numeric" });
+const fmtFecha = (s: string) =>
+  new Date(s).toLocaleDateString("es-CL", { day: "2-digit", month: "short", year: "numeric" });
 
 export default function AdminPage() {
   const [password, setPassword] = useState("");
   const [authed, setAuthed] = useState(false);
   const [authError, setAuthError] = useState("");
-  const [activeTab, setActiveTab] = useState<"precios" | "tasaciones">("precios");
+  const [tab, setTab] = useState<"precios" | "solicitudes" | "publicaciones">("precios");
 
   const [propertyData, setPropertyData] = useState<PropertyData[]>([]);
   const [tasaciones, setTasaciones] = useState<TasacionRecord[]>([]);
+  const [listings, setListings] = useState<ListingRecord[]>([]);
   const [loading, setLoading] = useState(false);
   const [seedStatus, setSeedStatus] = useState("");
 
-  // Form para nuevo/editar registro
   const [form, setForm] = useState({
-    comuna: "", propertyType: "casa",
-    avgPricePerM2: "", minPricePerM2: "", maxPricePerM2: "", referenceYear: "2025",
+    comuna: "",
+    sector: "",
+    propertyType: "casa",
+    avgPricePerM2: "",
+    minPricePerM2: "",
+    maxPricePerM2: "",
+    referenceYear: "2025",
   });
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState("");
 
   const fetchData = useCallback(async (pw: string) => {
     setLoading(true);
-    const res = await fetch("/api/admin", { headers: { "x-admin-password": pw } });
-    const data = await res.json();
-    setLoading(false);
-    if (!data.ok) { setAuthError("Contraseña incorrecta."); return false; }
-    setPropertyData(data.propertyData);
-    setTasaciones(data.tasaciones);
-    return true;
+    try {
+      const res = await fetch("/api/admin", { headers: { "x-admin-password": pw } });
+      const data = (await res.json()) as {
+        ok?: boolean;
+        error?: string;
+        propertyData?: PropertyData[];
+        tasaciones?: TasacionRecord[];
+        listings?: ListingRecord[];
+      };
+      if (!data.ok) {
+        setAuthError(data.error ?? "No autorizado.");
+        return false;
+      }
+      setPropertyData(data.propertyData ?? []);
+      setTasaciones(data.tasaciones ?? []);
+      setListings(data.listings ?? []);
+      return true;
+    } catch {
+      setAuthError("No se pudo conectar con el servidor.");
+      return false;
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  const handleLogin = async (e: React.FormEvent) => {
+  async function login(e: React.FormEvent) {
     e.preventDefault();
     setAuthError("");
     const ok = await fetchData(password);
     if (ok) setAuthed(true);
-  };
+  }
 
-  const handleSeed = async () => {
-    setSeedStatus("Cargando datos de Ñuble...");
-    const res = await fetch("/api/seed", { method: "POST" });
-    const data = await res.json();
-    setSeedStatus(data.message ?? "Error al cargar datos.");
+  async function cargarDatos() {
+    setSeedStatus("Cargando…");
+    const res = await fetch("/api/seed", {
+      method: "POST",
+      headers: { "x-admin-password": password },
+    });
+    const data = (await res.json()) as { ok?: boolean; message?: string; error?: string };
+    setSeedStatus(data.ok ? (data.message ?? "Listo.") : (data.error ?? "Error al cargar."));
     if (data.ok) fetchData(password);
-  };
+  }
 
-  const handleSave = async (e: React.FormEvent) => {
+  async function guardar(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
     setSaveMsg("");
@@ -98,213 +140,251 @@ export default function AdminPage() {
         referenceYear: parseInt(form.referenceYear, 10),
       }),
     });
-    const data = await res.json();
+    const data = (await res.json()) as { ok?: boolean; error?: string };
     setSaving(false);
     if (data.ok) {
-      setSaveMsg("✅ Guardado correctamente.");
-      setForm({ comuna: "", propertyType: "casa", avgPricePerM2: "", minPricePerM2: "", maxPricePerM2: "", referenceYear: "2025" });
+      setSaveMsg("Guardado.");
+      setForm({
+        comuna: "",
+        sector: "",
+        propertyType: "casa",
+        avgPricePerM2: "",
+        minPricePerM2: "",
+        maxPricePerM2: "",
+        referenceYear: "2025",
+      });
       fetchData(password);
     } else {
-      setSaveMsg("❌ " + data.error);
+      setSaveMsg(data.error ?? "No se pudo guardar.");
     }
-  };
+  }
 
-  const handleDelete = async (id: string, label: string) => {
-    if (!confirm(`¿Eliminar ${label}?`)) return;
+  async function cambiarPublicacion(id: string, isActive: boolean) {
+    await fetch("/api/admin/propiedades", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json", "x-admin-password": password },
+      body: JSON.stringify({ id, isActive }),
+    });
+    fetchData(password);
+  }
+
+  async function eliminar(id: string, etiqueta: string) {
+    if (!window.confirm(`¿Eliminar ${etiqueta}?`)) return;
     await fetch("/api/admin", {
       method: "DELETE",
       headers: { "Content-Type": "application/json", "x-admin-password": password },
       body: JSON.stringify({ id }),
     });
     fetchData(password);
-  };
+  }
 
-  const handleEdit = (row: PropertyData) => {
-    setForm({
-      comuna: row.comuna,
-      propertyType: row.propertyType,
-      avgPricePerM2: String(row.avgPricePerM2),
-      minPricePerM2: row.minPricePerM2 != null ? String(row.minPricePerM2) : "",
-      maxPricePerM2: row.maxPricePerM2 != null ? String(row.maxPricePerM2) : "",
-      referenceYear: String(row.referenceYear),
-    });
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  useEffect(() => { if (!authed) return; }, [authed]);
-
-  // ─── LOGIN ────────────────────────────────────────────────
   if (!authed) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-6">
-        <div className="w-full max-w-sm">
-          <div className="text-center mb-8">
-            <Link href="/" className="text-2xl font-bold">CVR</Link>
-            <p className="text-slate-400 text-sm mt-2">Panel de Administración</p>
-          </div>
-          <form onSubmit={handleLogin} className="glass-card p-8 space-y-4">
-            <div>
-              <label className="block text-sm text-slate-400 mb-1">Contraseña de acceso</label>
+      <main id="contenido" className="admin-login">
+        <div className="card form-card">
+          <h1 className="h3">Administración</h1>
+          <p className="muted small">CVR Propiedades · acceso restringido</p>
+          <form onSubmit={login}>
+            <div className="field">
+              <label htmlFor="admin-password">Contraseña</label>
               <input
-                type="password" value={password} onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••" required autoFocus
-                className="w-full bg-white/5 border border-[var(--color-glass-border)] rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-[var(--color-gold)] transition-colors"
+                id="admin-password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                autoComplete="current-password"
+                required
               />
             </div>
-            {authError && <p className="text-red-400 text-sm">{authError}</p>}
-            <button type="submit" className="w-full btn-primary py-3">Ingresar →</button>
-            <p className="text-xs text-center text-slate-600">
-              Contraseña por defecto: <code>cvr2025admin</code><br />
-              Cámbiala en el archivo <code>.env</code> con <code>ADMIN_PASSWORD=tuClave</code>
-            </p>
+            {authError && (
+              <p className="form-error" role="alert">
+                {authError}
+              </p>
+            )}
+            <button type="submit" className="btn-gold">
+              Ingresar
+            </button>
           </form>
+          <p className="hint">
+            La clave se configura en la variable de entorno <code>ADMIN_PASSWORD</code>. Si no
+            está definida, el acceso se rechaza.
+          </p>
         </div>
-      </div>
+      </main>
     );
   }
 
-  // ─── PANEL PRINCIPAL ──────────────────────────────────────
   return (
-    <div className="min-h-screen">
-      {/* Top nav */}
-      <nav className="fixed w-full top-0 z-50 bg-[var(--color-navy-dark)]/90 backdrop-blur-lg border-b border-[var(--color-glass-border)]">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-          <div className="flex items-baseline gap-2">
-            <span className="text-xl font-bold">CVR</span>
-            <span className="text-xs text-[var(--color-gold)] uppercase tracking-widest font-semibold">Admin</span>
+    <main id="contenido" className="admin">
+      <header className="admin-bar">
+        <div className="admin-bar-inner">
+          <div>
+            <strong>CVR Propiedades</strong> <span className="muted small">· Administración</span>
           </div>
-          <div className="flex items-center gap-6">
-            <Link href="/tasacion" className="text-sm text-slate-400 hover:text-white transition-colors">Ver tasación pública</Link>
-            <button onClick={() => setAuthed(false)} className="text-sm text-slate-500 hover:text-red-400 transition-colors">Cerrar sesión</button>
+          <div className="admin-actions">
+            <Link href="/tasacion" className="nav-link">
+              Ver estimador
+            </Link>
+            <button type="button" className="link-button" onClick={() => setAuthed(false)}>
+              Cerrar sesión
+            </button>
           </div>
         </div>
-      </nav>
+      </header>
 
-      <main className="pt-28 pb-20 px-6 max-w-7xl mx-auto">
-        {/* Stats row */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <div className="container section-tight">
+        <div className="notice small" role="note">
+          Esta pantalla muestra datos personales de solicitantes reales. Úsala solo para
+          gestionar solicitudes y no copies esos datos a otros sistemas.
+        </div>
+
+        <div className="grid four-col">
           {[
-            { label: "Comunas con datos", value: [...new Set(propertyData.map((p) => p.comuna))].length },
+            { label: "Comunas con datos", value: new Set(propertyData.map((p) => p.comuna)).size },
             { label: "Registros de precios", value: propertyData.length },
-            { label: "Tasaciones recibidas", value: tasaciones.length },
-            { label: "Tasaciones pagadas", value: tasaciones.filter((t) => t.paymentStatus === "paid").length },
+            { label: "Solicitudes recibidas", value: tasaciones.length },
+            { label: "Solicitudes pagadas", value: tasaciones.filter((t) => t.paymentStatus === "paid").length },
           ].map((s) => (
-            <div key={s.label} className="glass-card p-5 text-center">
-              <div className="text-3xl font-bold text-[var(--color-gold)]">{s.value}</div>
-              <div className="text-xs text-slate-400 mt-1">{s.label}</div>
+            <div key={s.label} className="card stat-card">
+              <span className="stat-num">{s.value}</span>
+              <span className="muted small">{s.label}</span>
             </div>
           ))}
         </div>
 
-        {/* Seed button */}
-        <div className="glass-card p-5 mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-          <div>
-            <h3 className="font-bold">Cargar datos iniciales de Ñuble</h3>
-            <p className="text-sm text-slate-400">Carga los valores de referencia de las 21 comunas de la región desde TocToc / Portal Inmobiliario.</p>
-          </div>
-          <div className="flex items-center gap-4">
-            {seedStatus && <span className="text-sm text-[var(--color-gold)]">{seedStatus}</span>}
-            <button onClick={handleSeed} className="btn-primary text-sm whitespace-nowrap">
-              Cargar datos base →
+        <div className="card">
+          <h2 className="h3">Datos de referencia</h2>
+          <p className="muted small">
+            Valores por comuna, sector y tipo de propiedad incluidos en el repositorio. Se
+            usan para la estimación referencial pública.
+          </p>
+          <div className="inline-actions">
+            <button type="button" className="btn-outline" onClick={cargarDatos}>
+              Cargar / actualizar datos base
             </button>
+            {seedStatus && <span className="small muted">{seedStatus}</span>}
           </div>
         </div>
 
-        {/* Tabs */}
-        <div className="flex gap-1 mb-6 bg-white/5 rounded-lg p-1 w-fit">
-          {(["precios", "tasaciones"] as const).map((tab) => (
-            <button key={tab} onClick={() => setActiveTab(tab)}
-              className={`px-5 py-2 rounded-md text-sm font-semibold transition-all capitalize ${
-                activeTab === tab ? "bg-[var(--color-gold)] text-black" : "text-slate-400 hover:text-white"
-              }`}
+        <div className="tabs" role="tablist" aria-label="Secciones del panel">
+          {(["precios", "solicitudes", "publicaciones"] as const).map((t) => (
+            <button
+              key={t}
+              type="button"
+              role="tab"
+              aria-selected={tab === t}
+              className={tab === t ? "tab is-active" : "tab"}
+              onClick={() => setTab(t)}
             >
-              {tab === "precios" ? "💰 Precios por m²" : "📋 Solicitudes"}
+              {t === "precios"
+                ? "Precios por m²"
+                : t === "solicitudes"
+                  ? "Solicitudes"
+                  : "Publicaciones"}
             </button>
           ))}
         </div>
 
-        {loading && <div className="text-center py-12 text-slate-400">Cargando datos...</div>}
+        {loading && <p className="muted">Cargando…</p>}
 
-        {/* ─── TAB: PRECIOS ──────────────────────────────── */}
-        {!loading && activeTab === "precios" && (
-          <div className="grid md:grid-cols-3 gap-6">
-            {/* Form agregar/editar */}
-            <div className="glass-card p-6">
-              <h3 className="font-bold mb-4 text-[var(--color-gold)]">Agregar / Actualizar precio</h3>
-              <form onSubmit={handleSave} className="space-y-3">
-                <div>
-                  <label className="block text-xs text-slate-400 mb-1">Comuna</label>
-                  <input name="comuna" value={form.comuna} onChange={(e) => setForm((p) => ({ ...p, comuna: e.target.value }))}
-                    placeholder="Ej: Chillán" required
-                    className="w-full bg-white/5 border border-[var(--color-glass-border)] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[var(--color-gold)] transition-colors"
+        {!loading && tab === "precios" && (
+          <div className="grid admin-grid">
+            <form className="card" onSubmit={guardar}>
+              <h2 className="h3">Agregar o actualizar</h2>
+              <div className="field">
+                <label htmlFor="a-comuna">Comuna</label>
+                <input
+                  id="a-comuna"
+                  value={form.comuna}
+                  onChange={(e) => setForm((p) => ({ ...p, comuna: e.target.value }))}
+                  required
+                />
+              </div>
+              <div className="field">
+                <label htmlFor="a-sector">Sector (vacío = referencia general)</label>
+                <input
+                  id="a-sector"
+                  value={form.sector}
+                  onChange={(e) => setForm((p) => ({ ...p, sector: e.target.value }))}
+                />
+              </div>
+              <div className="field">
+                <label htmlFor="a-tipo">Tipo</label>
+                <select
+                  id="a-tipo"
+                  value={form.propertyType}
+                  onChange={(e) => setForm((p) => ({ ...p, propertyType: e.target.value }))}
+                >
+                  {Object.entries(TIPO).map(([v, l]) => (
+                    <option key={v} value={v}>
+                      {l}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {[
+                { key: "avgPricePerM2", label: "Precio promedio UF/m²", req: true },
+                { key: "minPricePerM2", label: "Precio mínimo UF/m²", req: false },
+                { key: "maxPricePerM2", label: "Precio máximo UF/m²", req: false },
+                { key: "referenceYear", label: "Año de referencia", req: false },
+              ].map((f) => (
+                <div className="field" key={f.key}>
+                  <label htmlFor={`a-${f.key}`}>{f.label}</label>
+                  <input
+                    id={`a-${f.key}`}
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={form[f.key as keyof typeof form]}
+                    onChange={(e) => setForm((p) => ({ ...p, [f.key]: e.target.value }))}
+                    required={f.req}
                   />
                 </div>
-                <div>
-                  <label className="block text-xs text-slate-400 mb-1">Tipo</label>
-                  <select value={form.propertyType} onChange={(e) => setForm((p) => ({ ...p, propertyType: e.target.value }))}
-                    className="w-full bg-[#0d1e35] border border-[var(--color-glass-border)] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[var(--color-gold)] transition-colors"
-                  >
-                    <option value="casa">Casa</option>
-                    <option value="departamento">Departamento</option>
-                    <option value="terreno">Terreno</option>
-                    <option value="agricola">Agrícola</option>
-                  </select>
-                </div>
-                {[
-                  { key: "avgPricePerM2", label: "Precio promedio UF/m² *" },
-                  { key: "minPricePerM2", label: "Precio mínimo UF/m²" },
-                  { key: "maxPricePerM2", label: "Precio máximo UF/m²" },
-                  { key: "referenceYear", label: "Año de referencia" },
-                ].map((f) => (
-                  <div key={f.key}>
-                    <label className="block text-xs text-slate-400 mb-1">{f.label}</label>
-                    <input
-                      type="number" step="0.01" min="0"
-                      value={form[f.key as keyof typeof form]}
-                      onChange={(e) => setForm((p) => ({ ...p, [f.key]: e.target.value }))}
-                      required={f.key === "avgPricePerM2"}
-                      className="w-full bg-white/5 border border-[var(--color-glass-border)] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[var(--color-gold)] transition-colors"
-                    />
-                  </div>
-                ))}
-                {saveMsg && <p className="text-sm">{saveMsg}</p>}
-                <button type="submit" disabled={saving} className="w-full btn-primary py-2 text-sm">
-                  {saving ? "Guardando..." : "Guardar →"}
-                </button>
-              </form>
-            </div>
+              ))}
+              {saveMsg && <p className="small muted">{saveMsg}</p>}
+              <button type="submit" className="btn-gold" disabled={saving}>
+                {saving ? "Guardando…" : "Guardar"}
+              </button>
+            </form>
 
-            {/* Tabla */}
-            <div className="md:col-span-2 glass-card overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+            <div className="card table-card">
+              <div className="table-wrap">
+                <table className="data-table">
+                  <caption className="sr-only">Valores de referencia por comuna</caption>
                   <thead>
-                    <tr className="border-b border-[var(--color-glass-border)]">
-                      <th className="text-left px-4 py-3 text-slate-400 font-semibold">Comuna</th>
-                      <th className="text-left px-4 py-3 text-slate-400 font-semibold">Tipo</th>
-                      <th className="text-right px-4 py-3 text-slate-400 font-semibold">Prom. UF/m²</th>
-                      <th className="text-right px-4 py-3 text-slate-400 font-semibold">Rango</th>
-                      <th className="px-4 py-3"></th>
+                    <tr>
+                      <th scope="col">Comuna / sector</th>
+                      <th scope="col">Tipo</th>
+                      <th scope="col">Prom. UF/m²</th>
+                      <th scope="col">Año</th>
+                      <th scope="col"><span className="sr-only">Acciones</span></th>
                     </tr>
                   </thead>
                   <tbody>
                     {propertyData.map((row) => (
-                      <tr key={row.id} className="border-b border-[var(--color-glass-border)] hover:bg-white/3 transition-colors">
-                        <td className="px-4 py-3 font-semibold">{row.comuna}</td>
-                        <td className="px-4 py-3 text-slate-400">{TYPE_LABELS[row.propertyType] ?? row.propertyType}</td>
-                        <td className="px-4 py-3 text-right text-[var(--color-gold)] font-bold">{fmtUF(row.avgPricePerM2)}</td>
-                        <td className="px-4 py-3 text-right text-slate-500 text-xs">
-                          {row.minPricePerM2 != null ? fmtUF(row.minPricePerM2) : "—"} –{" "}
-                          {row.maxPricePerM2 != null ? fmtUF(row.maxPricePerM2) : "—"}
-                        </td>
-                        <td className="px-4 py-3 text-right">
-                          <button onClick={() => handleEdit(row)} className="text-xs text-slate-400 hover:text-[var(--color-gold)] mr-3 transition-colors">Editar</button>
-                          <button onClick={() => handleDelete(row.id, `${row.comuna} – ${row.propertyType}`)} className="text-xs text-red-500 hover:text-red-300 transition-colors">Eliminar</button>
+                      <tr key={row.id}>
+                        <th scope="row">
+                          {row.comuna}
+                          {row.sector ? <span className="muted small"> · {row.sector}</span> : null}
+                        </th>
+                        <td>{TIPO[row.propertyType] ?? row.propertyType}</td>
+                        <td>{fmtUF(row.avgPricePerM2)}</td>
+                        <td>{row.referenceYear}</td>
+                        <td>
+                          <button
+                            type="button"
+                            className="link-button danger"
+                            onClick={() => eliminar(row.id, `${row.comuna} ${row.sector}`)}
+                          >
+                            Eliminar
+                          </button>
                         </td>
                       </tr>
                     ))}
                     {propertyData.length === 0 && (
-                      <tr><td colSpan={5} className="px-4 py-8 text-center text-slate-500">No hay datos. Use el botón &ldquo;Cargar datos base&rdquo; para comenzar.</td></tr>
+                      <tr>
+                        <td colSpan={5}>Sin datos. Usa «Cargar / actualizar datos base».</td>
+                      </tr>
                     )}
                   </tbody>
                 </table>
@@ -313,51 +393,117 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* ─── TAB: TASACIONES ──────────────────────────── */}
-        {!loading && activeTab === "tasaciones" && (
-          <div className="glass-card overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+        {!loading && tab === "publicaciones" && (
+          <div className="card table-card">
+            <div className="table-wrap">
+              <table className="data-table">
+                <caption className="sr-only">Publicaciones enviadas por anunciantes</caption>
                 <thead>
-                  <tr className="border-b border-[var(--color-glass-border)]">
-                    {["Fecha", "Cliente", "Contacto", "Propiedad", "Valor UF", "Valor CLP", "Estado"].map((h) => (
-                      <th key={h} className="text-left px-4 py-3 text-slate-400 font-semibold whitespace-nowrap">{h}</th>
-                    ))}
+                  <tr>
+                    <th scope="col">Publicación</th>
+                    <th scope="col">Ubicación</th>
+                    <th scope="col">Precio UF</th>
+                    <th scope="col">Contacto</th>
+                    <th scope="col">Estado</th>
+                    <th scope="col"><span className="sr-only">Acciones</span></th>
                   </tr>
                 </thead>
                 <tbody>
-                  {tasaciones.map((t) => (
-                    <tr key={t.id} className="border-b border-[var(--color-glass-border)] hover:bg-white/3 transition-colors">
-                      <td className="px-4 py-3 text-slate-400 text-xs whitespace-nowrap">{fmtDate(t.createdAt)}</td>
-                      <td className="px-4 py-3 font-semibold">{t.clientName}</td>
-                      <td className="px-4 py-3 text-slate-400 text-xs">
-                        <div>{t.clientEmail}</div>
-                        <div>{t.clientPhone}</div>
-                      </td>
-                      <td className="px-4 py-3 text-xs">
-                        <div className="font-semibold">{t.comuna}</div>
-                        <div className="text-slate-400">{TYPE_LABELS[t.propertyType]} · {t.surface} m²</div>
-                      </td>
-                      <td className="px-4 py-3 text-[var(--color-gold)] font-bold whitespace-nowrap">{fmtUF(t.estimatedValueUF)} UF</td>
-                      <td className="px-4 py-3 text-slate-300 text-xs whitespace-nowrap">{fmtCLP(t.estimatedValueCLP)}</td>
-                      <td className="px-4 py-3">
-                        <span className={`inline-block px-2 py-1 rounded text-[10px] font-bold uppercase ${
-                          t.paymentStatus === "paid" ? "bg-green-900/50 text-green-400" : "bg-yellow-900/50 text-yellow-400"
-                        }`}>
-                          {t.paymentStatus === "paid" ? "Pagado" : "Pendiente"}
+                  {listings.map((l) => (
+                    <tr key={l.id}>
+                      <th scope="row">
+                        {l.title}
+                        <span className="muted small">
+                          {" "}
+                          · {TIPO[l.propertyType] ?? l.propertyType} ·{" "}
+                          {l.transactionType === "arriendo" ? "Arriendo" : "Venta"}
                         </span>
+                      </th>
+                      <td className="small">
+                        {l.sector ? `${l.sector}, ` : ""}
+                        {l.comuna}
+                      </td>
+                      <td>{fmtUF(l.priceUF)}</td>
+                      <td className="small">
+                        {l.contactName}
+                        <br />
+                        {l.contactPhone}
+                      </td>
+                      <td>
+                        <span className={l.isActive ? "badge badge-ok" : "badge badge-warn"}>
+                          {l.isActive ? "Publicada" : "En revisión"}
+                        </span>
+                      </td>
+                      <td>
+                        <button
+                          type="button"
+                          className="link-button"
+                          onClick={() => cambiarPublicacion(l.id, !l.isActive)}
+                        >
+                          {l.isActive ? "Retirar" : "Publicar"}
+                        </button>
                       </td>
                     </tr>
                   ))}
-                  {tasaciones.length === 0 && (
-                    <tr><td colSpan={7} className="px-4 py-8 text-center text-slate-500">Aún no hay solicitudes de tasación.</td></tr>
+                  {listings.length === 0 && (
+                    <tr>
+                      <td colSpan={6}>Aún no hay publicaciones de terceros.</td>
+                    </tr>
                   )}
                 </tbody>
               </table>
             </div>
           </div>
         )}
-      </main>
-    </div>
+
+        {!loading && tab === "solicitudes" && (
+          <div className="card table-card">
+            <div className="table-wrap">
+              <table className="data-table">
+                <caption className="sr-only">Solicitudes de estimación recibidas</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Fecha</th>
+                    <th scope="col">Solicitante</th>
+                    <th scope="col">Contacto</th>
+                    <th scope="col">Propiedad</th>
+                    <th scope="col">Valor UF</th>
+                    <th scope="col">Pago</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {tasaciones.map((t) => (
+                    <tr key={t.id}>
+                      <td>{fmtFecha(t.createdAt)}</td>
+                      <th scope="row">{t.clientName}</th>
+                      <td className="small">
+                        {t.clientEmail}
+                        <br />
+                        {t.clientPhone}
+                      </td>
+                      <td className="small">
+                        {TIPO[t.propertyType] ?? t.propertyType} · {t.comuna} · {t.surface} m²
+                      </td>
+                      <td>{fmtUF(t.estimatedValueUF)}</td>
+                      <td>
+                        <span className={t.paymentStatus === "paid" ? "badge badge-ok" : "badge badge-warn"}>
+                          {t.paymentStatus === "paid" ? "Pagado" : "Pendiente"}
+                        </span>
+                        <div className="small muted">{fmtCLP(t.estimatedValueCLP)}</div>
+                      </td>
+                    </tr>
+                  ))}
+                  {tasaciones.length === 0 && (
+                    <tr>
+                      <td colSpan={6}>Aún no hay solicitudes.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </div>
+    </main>
   );
 }
