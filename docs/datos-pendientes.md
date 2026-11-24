@@ -31,8 +31,10 @@ cliente que entró a la política de privacidad para decidir si confía.
 
 ## Pendientes que no son datos de pantalla
 
-- Inscripción en la lista de peritos de la Corte de Apelaciones de Chillán: por
-  confirmar con Carlos. La regla de qué se publica vive en
+- Inscripción en la lista de peritos de la Corte de Apelaciones: **resuelto, no
+  es un pendiente**. Carlos confirmó que no está inscrito en ninguna Corte, y el
+  sitio de tasaciones lo dice en afirmativo. No se publica lo contrario ni se
+  insinúa un trámite en curso. La regla vive en
   `docs/credenciales-publicables.md`, regla 7.
 - Plazo de entrega y política de reembolso de un informe encargado: decisión de
   Carlos. El sitio no publica un plazo propio: dice que se acuerda por escrito en
