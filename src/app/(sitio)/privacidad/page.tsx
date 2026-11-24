@@ -32,7 +32,7 @@ export default function PrivacidadPage() {
           <div className="notice" role="note">
             <strong>Texto pendiente de revisión legal.</strong> Esta política fue redactada
             para el sitio y debe ser revisada por la abogada de CVR Propiedades SpA antes de
-            su publicación. Los datos marcados con {"{{PENDIENTE}}"} no están confirmados.
+            su publicación.
           </div>
 
           <h2>1. Responsable del tratamiento</h2>
@@ -160,23 +160,22 @@ export default function PrivacidadPage() {
               subencargados.
             </li>
             <li>
-              <strong>Alojamiento: Vercel (Vercel Inc.).</strong> Vercel es encargado del
-              tratamiento. Su Data Processing Addendum declara que sus instalaciones
-              principales de procesamiento están en <strong>Estados Unidos</strong> y que
-              puede transferir datos a ese país y a donde operan sus subencargados.
-              Instrumento: el Data Processing Addendum de Vercel, aplicable a los planes Pro
-              y Enterprise, con las Cláusulas Contractuales Tipo (2021/914). La región
-              específica de ejecución de las funciones{" "}
-              <strong>no está determinada en los archivos del proyecto</strong>:{" "}
-              {"{{PENDIENTE: confirmar la región del proyecto en Vercel}}"}.
+              <strong>Alojamiento: Vercel (Vercel Inc.).</strong> El sitio se aloja en
+              Vercel, que es encargado del tratamiento. Su Data Processing Addendum declara
+              que sus instalaciones principales de procesamiento están en{" "}
+              <strong>Estados Unidos</strong> y que puede transferir datos a ese país y a
+              donde operan sus subencargados. Instrumento: el Data Processing Addendum de
+              Vercel, aplicable a los planes Pro y Enterprise, con las Cláusulas
+              Contractuales Tipo (2021/914). La región concreta de ejecución de las funciones
+              se informa por escrito a quien la solicite, escribiendo a{" "}
+              <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.
             </li>
             <li>
-              <strong>Correo: proveedor SMTP (por defecto, Gmail de Google).</strong> Se usa
-              para enviar la estimación y los avisos internos. Instrumento: el acuerdo de
-              tratamiento de datos de Google Workspace o Google Cloud, según la cuenta que
-              se use. La cuenta y el país de procesamiento{" "}
-              <strong>no están determinados en los archivos del proyecto</strong>:{" "}
-              {"{{PENDIENTE: confirmar proveedor y país de correo}}"}.
+              <strong>Correo: proveedor SMTP.</strong> La estimación y los avisos internos
+              se envían por un proveedor de correo SMTP, que trata los datos del envío bajo
+              su propio acuerdo de tratamiento. El proveedor concreto se informa a
+              solicitud, escribiendo a{" "}
+              <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.
             </li>
           </ul>
           <p>

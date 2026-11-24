@@ -336,7 +336,7 @@ export async function generateTasacionPDF(data: EstimacionData): Promise<Uint8Ar
   y -= 14;
   y = paragraph(
     page,
-    "Lo que este cálculo no hace: no inspecciona el inmueble, no verifica la superficie ni el estado declarado, no homologa comparables y no revisa títulos, cargas ni derechos de agua.",
+    "Lo que este cálculo no hace: no inspecciona el inmueble, no verifica la superficie ni el estado declarado, no homologa comparables, no revisa títulos, cargas ni derechos de agua y no aplica una norma de tasación.",
     30,
     y,
     regular,

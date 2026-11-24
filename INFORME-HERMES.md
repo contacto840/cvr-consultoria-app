@@ -3,6 +3,8 @@
 Rama de trabajo: `hermes/20261123-230554` (worktree `C:\Users\carlo\Desktop\.hermes-worktrees\.cvr-main-integracion-20261123-230554`).
 No se hizo push, no se desplegó y no se aplicó ninguna migración contra la base.
 
+Actualización del 24 de noviembre de 2026: se retiraron de la pantalla los marcadores que quedaban. `/privacidad` y la calculadora publican ahora la parte que consta y dicen con quién se confirma el resto; lo que sigue faltando está en `docs/datos-pendientes.md`. Se restituyó en el PDF la frase «y no aplica una norma de tasación». Las secciones 4 y 5 quedan corregidas más abajo.
+
 ## 1. Archivos y qué cambió
 
 - `src/lib/honorarios.ts` (nuevo): fuente única de la tabla de honorarios (venta, arriendo, administración, asesoría, corredores), IVA y mínimo en UF de la asesoría.
@@ -24,7 +26,7 @@ No se hizo push, no se desplegó y no se aplicó ninguna migración contra la ba
 - `src/app/api/tasacion/route.ts`: guarda `estimatedValueCLP` nullable, `ufValueCLP` y `ufDate`.
 - `src/lib/encargo.ts`: plazo «se acuerda por escrito al aceptar el encargo»; el precio queda solo como dato legado del código de pagos.
 - `src/lib/fulfill.ts`: usa `ufValueCLP`/`ufDate` guardados y tolera `estimatedValueCLP` nulo; se anota que el camino de pago quedó sin uso.
-- `src/lib/pdf-generator.ts`: dorado actualizado a `#c9a84c`; etiqueta «UF del …» en vez de «solicitud del …»; se quita la mención a una norma de tasación; «profesional» en vez de «perito».
+- `src/lib/pdf-generator.ts`: dorado actualizado a `#c9a84c`; etiqueta «UF del …» en vez de «solicitud del …»; «profesional» en vez de «perito». La frase «y no aplica una norma de tasación» se había retirado del descargo y se restituyó el 24-nov-2026.
 - `src/lib/mailer.ts`: dorado de los correos a `#c9a84c`.
 - `src/app/(sitio)/terminos/page.tsx`: sección 4 reescrita: estimación gratuita, informe cotizado, sin cobro en línea, condiciones por escrito y política de reembolso.
 - `src/app/(sitio)/privacidad/page.tsx`: domicilio «Chillán, Región de Ñuble, Chile» sin dirección de calle; conservación 12/24/activa+12 meses marcada como pendiente legal; transferencia internacional con Neon y Vercel, países e instrumentos; derechos con `contacto@cvrpropiedades.com`.
@@ -47,7 +49,7 @@ No se hizo push, no se desplegó y no se aplicó ninguna migración contra la ba
 10. **Estados de control.** Botones y enlaces: reposo, hover, `:focus-visible`, `:active`, `:disabled`; campos: reposo, hover, foco, inválido y deshabilitado; pestañas: reposo, hover, activo, deshabilitado; tarjetas de radio: reposo, hover, `:focus-within`, seleccionada. Los envíos muestran «Calculando…», «Enviando la solicitud…», etc.
 11. **Secretos y variables.** No se agregó ninguna variable de entorno. `.env.example` no cambió. No hay claves ni tokens en el código; la cadena de conexión no se publicó.
 12. **`src/lib/admin-auth.ts`.** Sin cambios en el diff; sigue fallando cerrado, rechazando la clave filtrada y comparando en tiempo constante.
-13. **PDF.** Se mantiene el título «ESTIMACIÓN REFERENCIAL DE VALOR», el descargo en el encabezado, la ausencia de firma y la ausencia de mención a una norma (se eliminó la frase «no aplica una norma de tasación»). Se actualizó el dorado y la etiqueta de fecha de la UF.
+13. **PDF.** Se mantiene el título «ESTIMACIÓN REFERENCIAL DE VALOR», el descargo en el encabezado, la ausencia de firma y la frase del descargo «… no revisa títulos, cargas ni derechos de agua y no aplica una norma de tasación» (restituida el 24-nov-2026). Se actualizó el dorado y la etiqueta de fecha de la UF.
 
 ## 3. Salidas pegadas
 
@@ -126,11 +128,11 @@ Route (app)                           Revalidate  Expire
 
 **Neon: determinado.** La cadena de conexión configurada tiene el host con sufijo `sa-east-1`, que corresponde a la región AWS South America (São Paulo), **Brasil**. Se leyó solo el host, sin publicar la cadena ni las credenciales. `npx prisma migrate status` confirmó el datasource PostgreSQL en esa región y que la migración nueva **no** está aplicada.
 
-**Vercel: país determinado, región no.** `.vercel/project.json` solo contiene `projectId`, `orgId` y `projectName`; no tiene campo de región. No hay CLI de Vercel autenticada en este host para consultar la configuración del proyecto. El Data Processing Addendum de Vercel declara que sus instalaciones principales de procesamiento están en **Estados Unidos** y que puede transferir datos a EE.UU. y a las jurisdicciones de sus subencargados. Por eso la política declara Estados Unidos como país y deja el marcador `{{PENDIENTE: confirmar la región del proyecto en Vercel}}` para la región de ejecución.
+**Vercel: país determinado, región no.** `.vercel/project.json` solo contiene `projectId`, `orgId` y `projectName`; no tiene campo de región. No hay CLI de Vercel autenticada en este host para consultar la configuración del proyecto. El Data Processing Addendum de Vercel declara que sus instalaciones principales de procesamiento están en **Estados Unidos** y que puede transferir datos a EE.UU. y a las jurisdicciones de sus subencargados. Por eso la política declara Estados Unidos como país y dice que la región concreta de ejecución se informa por escrito a quien la solicite.
 
-**Correo: no determinado.** El SMTP por defecto del proyecto es Gmail; no se puede confirmar desde los archivos la cuenta ni el país. Queda `{{PENDIENTE: confirmar proveedor y país de correo}}`.
+**Correo: no determinado.** El SMTP por defecto del proyecto es Gmail; no se puede confirmar desde los archivos la cuenta ni el país. La política declara que el envío se hace por un proveedor SMTP, bajo su acuerdo de tratamiento, y que el proveedor concreto se informa a solicitud.
 
-**Instrumentos declarados en la política:** Data Processing Addendum de Neon (con Cláusulas Contractuales Tipo 2021/914 y Marco de Privacidad de Datos UE-EE.UU.); Data Processing Addendum de Vercel (aplicable a planes Pro y Enterprise, con Cláusulas Contractuales Tipo 2021/914); acuerdo de tratamiento de Google Workspace/Google Cloud para el correo. La sección 4 de privacidad queda marcada como pendiente de revisión legal.
+**Instrumentos declarados en la política:** Data Processing Addendum de Neon (con Cláusulas Contractuales Tipo 2021/914 y Marco de Privacidad de Datos UE-EE.UU.); Data Processing Addendum de Vercel (aplicable a planes Pro y Enterprise, con Cláusulas Contractuales Tipo 2021/914); acuerdo de tratamiento del proveedor SMTP para el correo. La sección 4 de privacidad queda marcada como pendiente de revisión legal.
 
 ## 5. Marcadores cerrados y abiertos
 
@@ -140,12 +142,12 @@ Cerrados:
 - `{{PENDIENTE: domicilio legal y correo de privacidad}}`.
 - `{{PENDIENTE: plazo de conservación de consultas / estimaciones / publicaciones}}`: reemplazados por 12 meses, 24 meses y «activa + 12 meses», con la nota visible de que son plazos propuestos pendientes de revisión legal.
 - `{{PENDIENTE: política de reembolso...}}`.
-- `{{PENDIENTE: detalle de países de destino...}}`: reemplazado por el detalle de Neon/Vercel/correo; sobreviven solo los dos marcadores de región no determinada.
+- `{{PENDIENTE: detalle de países de destino...}}`: reemplazado por el detalle de Neon/Vercel/correo; los dos datos no determinados se enuncian como información disponible a solicitud.
 
-Abiertos y por qué:
-- Región de ejecución de Vercel: no está en `project.json` ni en la documentación del proyecto; no se adivina.
-- País/cuenta del proveedor de correo: no está en los archivos.
-- Cuatro `{{PENDIENTE}}` de `src/lib/costos-compra.ts` (tasa de inscripción, arancel notarial, certificados municipales, tasa/tope bancario): son datos de terceros ajenos a este encargo y siguen visibles en la calculadora.
+Abiertos y por qué (registro vivo en `docs/datos-pendientes.md`):
+- Región de ejecución de Vercel: no está en `project.json` ni en la documentación del proyecto; no se adivina. La página dice que se informa por escrito a solicitud.
+- País y cuenta del proveedor de correo: no están en los archivos. La página dice que el proveedor concreto se informa a solicitud.
+- Cuatro datos de la calculadora (tasa y tope de timbres, arancel notarial, arancel de inscripción del CBR y certificados municipales y de avalúo): se publican como valor referencial, con el tercero que entrega el monto exacto, sin marcador.
 
 ## 6. Migración generada
 
