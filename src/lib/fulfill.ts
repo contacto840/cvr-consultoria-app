@@ -37,6 +37,9 @@ export async function cumplirEncargo(tasacionId: string, paymentId: string) {
 
   try {
     const valorM2 = record.surface > 0 ? record.estimatedValueUF / record.surface : 0;
+    // El registro guarda 0 en `estimatedValueCLP` cuando la UF no estaba
+    // disponible al calcular: en ese caso el PDF se emite solo en UF.
+    const tienePesos = record.estimatedValueCLP > 0 && record.estimatedValueUF > 0;
     const pdf = await generateTasacionPDF({
       tasacionId: record.id,
       clientName: record.clientName,
@@ -48,7 +51,7 @@ export async function cumplirEncargo(tasacionId: string, paymentId: string) {
       surface: record.surface,
       condition: record.condition,
       estimatedValueUF: record.estimatedValueUF,
-      estimatedValueCLP: record.estimatedValueCLP,
+      estimatedValueCLP: tienePesos ? record.estimatedValueCLP : null,
       minValueUF: ref?.minPricePerM2
         ? Math.round(ref.minPricePerM2 * record.surface * 100) / 100
         : Math.round(record.estimatedValueUF * 0.85 * 100) / 100,
@@ -56,10 +59,12 @@ export async function cumplirEncargo(tasacionId: string, paymentId: string) {
         ? Math.round(ref.maxPricePerM2 * record.surface * 100) / 100
         : Math.round(record.estimatedValueUF * 1.15 * 100) / 100,
       pricePerM2UF: Math.round(valorM2 * 100) / 100,
-      ufValueCLP:
-        record.estimatedValueUF > 0
-          ? Math.round(record.estimatedValueCLP / record.estimatedValueUF)
-          : 0,
+      // La UF usada se recupera del monto guardado; la fecha es la de la
+      // solicitud, que es el día al que correspondía ese valor.
+      ufValueCLP: tienePesos
+        ? Math.round((record.estimatedValueCLP / record.estimatedValueUF) * 100) / 100
+        : null,
+      ufDate: tienePesos ? record.createdAt : null,
       referenceYear: ref?.referenceYear ?? new Date().getFullYear(),
       sampleSize: ref?.sampleSize,
       createdAt: record.createdAt,

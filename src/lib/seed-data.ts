@@ -1,9 +1,11 @@
 // Datos de referencia de precios por m² en UF para la Región de Ñuble
 // Fuente: TocToc, Portal Inmobiliario, datos SII y referencias de mercado CVR 2025
 // Granularidad por sector/barrio dentro de cada comuna
-
-// Valor UF del día (actualizar periódicamente)
-export const UF_VALUE_CLP = 38500;
+//
+// El valor de la UF no vive aquí: se obtiene del SII en `src/lib/uf.ts`.
+// Este archivo se importa desde componentes de cliente, así que no debe
+// contener lógica de servidor ni constantes monetarias que puedan quedar
+// desactualizadas.
 
 export interface PropertyDataSeed {
   comuna: string;

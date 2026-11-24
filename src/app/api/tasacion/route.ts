@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { UF_VALUE_CLP } from "@/lib/seed-data";
+import { obtenerUfDelDia } from "@/lib/uf";
 
 const TIPOS = new Set(["casa", "departamento", "terreno", "agricola"]);
 const CONDICIONES = new Set(["excelente", "bueno", "normal", "regular", "malo"]);
@@ -122,11 +122,17 @@ export async function POST(req: NextRequest) {
 
     const precioM2 = refData.avgPricePerM2 * fCondicion * fEdad;
     const estimatedValueUF = Math.round(precioM2 * surface * 100) / 100;
-    const estimatedValueCLP = Math.round(estimatedValueUF * UF_VALUE_CLP);
     const minValueUF =
       Math.round((refData.minPricePerM2 ?? refData.avgPricePerM2 * 0.85) * surface * 100) / 100;
     const maxValueUF =
       Math.round((refData.maxPricePerM2 ?? refData.avgPricePerM2 * 1.15) * surface * 100) / 100;
+
+    // La conversión a pesos depende del valor oficial de la UF del día (SII).
+    // Si la fuente no responde, no se inventa una cifra: la estimación queda
+    // solo en UF y `estimatedValueCLP` se guarda en 0 como marca de "no
+    // disponible" (la columna es Float obligatoria en el esquema actual).
+    const uf = await obtenerUfDelDia();
+    const estimatedValueCLP = uf ? Math.round(estimatedValueUF * uf.valorCLP) : null;
 
     const record = await prisma.tasacionRequest.create({
       data: {
@@ -139,7 +145,7 @@ export async function POST(req: NextRequest) {
         surface,
         condition,
         estimatedValueUF,
-        estimatedValueCLP,
+        estimatedValueCLP: estimatedValueCLP ?? 0,
         paymentStatus: "pending",
       },
     });
@@ -158,7 +164,8 @@ export async function POST(req: NextRequest) {
         propertyType,
         surface,
         condition,
-        ufValueCLP: UF_VALUE_CLP,
+        ufValueCLP: uf?.valorCLP ?? null,
+        ufDate: uf?.fecha ?? null,
         referenceYear: refData.referenceYear,
         usedSector: refData.sector,
         sampleSize: refData.sampleSize,

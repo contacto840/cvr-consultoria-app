@@ -1,4 +1,5 @@
-import { PDFDocument, rgb, StandardFonts, PDFPage, PDFFont } from "pdf-lib";
+import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
+import type { PDFPage, PDFFont } from "pdf-lib";
 
 /**
  * Estimación referencial de valor.
@@ -31,6 +32,15 @@ const fecha = (d?: Date) =>
     day: "2-digit",
     month: "long",
     year: "numeric",
+  });
+
+/** Fecha en horario de Chile, para no correr el día cuando el servidor corre en UTC. */
+const fechaChile = (d: Date) =>
+  d.toLocaleDateString("es-CL", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "America/Santiago",
   });
 
 function rect(page: PDFPage, x: number, y: number, w: number, h: number, color: ReturnType<typeof rgb>) {
@@ -98,11 +108,14 @@ export interface EstimacionData {
   surface: number; // m²
   condition: string;
   estimatedValueUF: number;
-  estimatedValueCLP: number;
+  /** null cuando no se pudo obtener el valor oficial de la UF: el PDF va solo en UF. */
+  estimatedValueCLP: number | null;
   minValueUF: number;
   maxValueUF: number;
   pricePerM2UF: number;
-  ufValueCLP: number;
+  ufValueCLP: number | null;
+  /** Fecha a la que correspondía el valor de la UF usado en el cálculo. */
+  ufDate?: Date | null;
   referenceYear: number;
   sampleSize?: number;
   createdAt?: Date;
@@ -125,6 +138,13 @@ export async function generateTasacionPDF(data: EstimacionData): Promise<Uint8Ar
   const bold = await doc.embedFont(StandardFonts.HelveticaBold);
   const regular = await doc.embedFont(StandardFonts.Helvetica);
   const italic = await doc.embedFont(StandardFonts.HelveticaOblique);
+
+  // Solo se muestra una cifra en pesos si además se conoce la UF usada: una
+  // cifra sin su UF y su fecha no es auditable.
+  const conversion =
+    data.estimatedValueCLP !== null && data.ufValueCLP !== null
+      ? { clp: data.estimatedValueCLP, uf: data.ufValueCLP }
+      : null;
 
   // ── ENCABEZADO ──────────────────────────────────────────────
   rect(page, 0, H - 86, W, 86, NAVY);
@@ -192,7 +212,17 @@ export async function generateTasacionPDF(data: EstimacionData): Promise<Uint8Ar
   rect(page, 30, y + 2, W - 60, 3, GOLD);
   page.drawText("VALOR ESTIMADO (REFERENCIAL)", { x: 44, y: y - 16, size: 8, font: bold, color: GOLD });
   page.drawText(`${UF(data.estimatedValueUF)} UF`, { x: 44, y: y - 44, size: 26, font: bold, color: WHITE });
-  page.drawText(`$ ${CLP(data.estimatedValueCLP)} CLP`, { x: 44, y: y - 62, size: 11, font: regular, color: GRAY });
+  if (conversion) {
+    page.drawText(`$ ${CLP(conversion.clp)} CLP`, { x: 44, y: y - 62, size: 11, font: regular, color: GRAY });
+  } else {
+    page.drawText("Conversión a pesos no disponible en este momento", {
+      x: 44,
+      y: y - 62,
+      size: 9,
+      font: regular,
+      color: GRAY,
+    });
+  }
 
   const rx = W - 205;
   line(page, rx - 12, y - 14, rx - 12, y - 68, GRAY, 0.4);
@@ -274,19 +304,34 @@ export async function generateTasacionPDF(data: EstimacionData): Promise<Uint8Ar
   y = paragraph(page, metodo, 30, y, regular, 8, GRAY, 535, 11);
 
   y -= 12;
-  y = paragraph(
-    page,
-    `El equivalente en pesos se calcula con una UF de referencia de $${CLP(
-      data.ufValueCLP
-    )}, no con el valor oficial del día de la emisión.`,
-    30,
-    y,
-    regular,
-    8,
-    GRAY,
-    535,
-    11
-  );
+  if (conversion) {
+    const fechaUf = data.ufDate ? ` (solicitud del ${fechaChile(data.ufDate)})` : "";
+    y = paragraph(
+      page,
+      `El equivalente en pesos se calcula con el valor de la UF aplicado en el cálculo: $${UF(
+        conversion.uf
+      )} por UF${fechaUf}. Ese valor lo publica el Servicio de Impuestos Internos; la UF cambia todos los días.`,
+      30,
+      y,
+      regular,
+      8,
+      GRAY,
+      535,
+      11
+    );
+  } else {
+    y = paragraph(
+      page,
+      "No se incluye equivalente en pesos: el valor oficial de la UF no estaba disponible al generar esta estimación, que se expresa solo en UF.",
+      30,
+      y,
+      regular,
+      8,
+      GRAY,
+      535,
+      11
+    );
+  }
 
   y -= 14;
   y = paragraph(

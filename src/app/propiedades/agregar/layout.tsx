@@ -7,13 +7,18 @@ export const metadata: Metadata = {
   description:
     "Publica tu propiedad en CVR Propiedades sin costo. La publicación se revisa antes de aparecer y no expone tu dirección ni tu teléfono.",
   alternates: { canonical: "/propiedades/agregar" },
+  // Formulario interno de carga: no se indexa. La ruta también está bloqueada
+  // en src/app/robots.ts.
+  robots: { index: false, follow: false, nocache: true },
 };
 
 export default function AgregarLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
       <SiteHeader />
-      {children}
+      <main id="contenido" tabIndex={-1}>
+        {children}
+      </main>
       <SiteFooter />
     </>
   );

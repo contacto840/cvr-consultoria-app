@@ -24,7 +24,7 @@ const CONDICIONES = [
 
 interface Resultado {
   estimatedValueUF: number;
-  estimatedValueCLP: number;
+  estimatedValueCLP: number | null;
   minValueUF: number;
   maxValueUF: number;
   pricePerM2UF: number;
@@ -32,7 +32,8 @@ interface Resultado {
   sector: string;
   propertyType: string;
   surface: number;
-  ufValueCLP: number;
+  ufValueCLP: number | null;
+  ufDate: string | null;
   referenceYear: number;
   usedSector: string;
   sampleSize?: number;
@@ -42,6 +43,18 @@ interface Resultado {
 
 const fmt = (n: number, d = 0) =>
   n.toLocaleString("es-CL", { minimumFractionDigits: d, maximumFractionDigits: d });
+
+/** "2026-11-23" → "23 de noviembre de 2026". Se arma en horario local para no correr el día. */
+const fechaLarga = (iso: string | null) => {
+  if (!iso) return "";
+  const [anio, mes, dia] = iso.split("-").map(Number);
+  if (!anio || !mes || !dia) return "";
+  return new Date(anio, mes - 1, dia).toLocaleDateString("es-CL", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+};
 
 export default function Estimador() {
   const sp = useSearchParams();
@@ -226,14 +239,24 @@ export default function Estimador() {
         <div className="card">
           <p className="eyebrow">Estimación referencial</p>
           <h2 className="value-big">{fmt(resultado.estimatedValueUF, 1)} UF</h2>
-          <p className="muted">
-            ${fmt(resultado.estimatedValueCLP)} CLP a la UF de referencia de $
-            {fmt(resultado.ufValueCLP)}.
-          </p>
-          <p className="hint">
-            El valor en pesos usa una UF fija de referencia, no el valor oficial del día.{" "}
-            {"{{PENDIENTE: automatizar el valor de la UF con la fuente oficial}}"}
-          </p>
+          {resultado.estimatedValueCLP !== null && resultado.ufValueCLP !== null ? (
+            <>
+              <p className="muted">
+                ${fmt(resultado.estimatedValueCLP)} CLP al valor de la UF del{" "}
+                {fechaLarga(resultado.ufDate)} (${fmt(resultado.ufValueCLP, 2)}).
+              </p>
+              <p className="hint">
+                Conversión calculada con el valor de la UF publicado por el Servicio de
+                Impuestos Internos para el {fechaLarga(resultado.ufDate)}. La UF cambia
+                todos los días: el valor en pesos corresponde a esa fecha.
+              </p>
+            </>
+          ) : (
+            <p className="notice small" role="status">
+              La conversión a pesos no está disponible en este momento: no pudimos obtener
+              el valor oficial de la UF. La estimación se expresa solo en UF.
+            </p>
+          )}
           <dl className="listing-facts listing-facts-wide">
             <div>
               <dt>Rango</dt>

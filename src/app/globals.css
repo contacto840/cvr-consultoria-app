@@ -720,7 +720,16 @@ svg {
 .field select:focus,
 .field textarea:focus {
   border-color: var(--gold);
-  outline: 2px solid transparent;
+}
+
+/* El borde dorado solo no basta como indicador de foco: se mantiene el anillo
+   del sistema para quien navega con teclado. */
+.field input:focus-visible,
+.field select:focus-visible,
+.field textarea:focus-visible {
+  border-color: var(--gold);
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
 }
 
 .field-grid {
@@ -736,6 +745,53 @@ svg {
   border: none;
   margin: 0 0 20px;
   padding: 0;
+}
+
+/* Secciones de un formulario largo: fieldset + legend con el mismo
+   sistema visual que los títulos del sitio. */
+.form-section {
+  border: none;
+  border-bottom: 1px solid var(--border);
+  margin: 0;
+  padding: 0 0 12px;
+}
+
+.form-section + .form-section {
+  padding-top: 28px;
+}
+
+.form-section:last-of-type {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.fieldset legend.form-section-title {
+  padding: 0;
+  margin-bottom: 16px;
+  font-family: var(--font-playfair), Georgia, serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  text-transform: none;
+  color: var(--text);
+}
+
+.field-error {
+  margin-top: 6px;
+  color: #ffb4b4;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.field input[aria-invalid="true"],
+.field select[aria-invalid="true"],
+.field textarea[aria-invalid="true"] {
+  border-color: #e08a8a;
+}
+
+.check-row input[aria-invalid="true"] {
+  outline: 2px solid #e08a8a;
+  outline-offset: 2px;
 }
 
 .check-row {
@@ -1208,41 +1264,6 @@ svg {
 }
 
 /* ── Panel de administración ───────────────────────────────── */
-.admin-login {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-}
-.admin-login .form-card {
-  width: 100%;
-  max-width: 380px;
-}
-
-.admin-bar {
-  background: var(--navy-mid);
-  border-bottom: 1px solid var(--border);
-  position: sticky;
-  top: 0;
-  z-index: 50;
-}
-.admin-bar-inner {
-  max-width: 1180px;
-  margin: 0 auto;
-  padding: 14px 24px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-.admin-actions {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-}
-
 .admin-grid {
   grid-template-columns: 320px 1fr;
   align-items: start;
