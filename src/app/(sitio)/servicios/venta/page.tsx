@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import JsonLd from "@/components/json-ld";
+import { honorarioDe } from "@/lib/honorarios";
 import { SITE } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -29,6 +30,7 @@ const serviceLd = {
 };
 
 export default function VentaPage() {
+  const honorario = honorarioDe("venta");
   return (
     <>
       <JsonLd data={serviceLd} />
@@ -123,18 +125,32 @@ export default function VentaPage() {
         <div className="container narrow">
           <h2 className="section-title">Honorarios</h2>
           <p>
-            La comisión de corretaje se pacta por escrito antes de comenzar, se calcula
-            sobre el precio de venta y se paga contra la escritura. No hay cobros por
-            publicar ni por recibir visitas.
+            <strong>{honorario.honorario}.</strong> {honorario.determina} No hay cobros
+            por publicar ni por recibir visitas.
           </p>
-          <p className="pending">
-            {"{{PENDIENTE: honorarios, definir porcentaje y condiciones con Carlos}}"}
+          <p>
+            El honorario es por parte: lo paga quien encarga la representación. En Chile
+            es costumbre que la comisión la paguen ambas partes y no existe una ley que
+            fije ese reparto; cuál paga qué se declara por escrito en la orden de
+            corretaje antes de empezar.
           </p>
           <p>
             El detalle de lo que cuesta comprar —timbres, notaría, Conservador y
             corretaje— está en la{" "}
-            <Link href="/herramientas/costos-de-compra">calculadora de costos de compra</Link>.
+            <Link href="/herramientas/costos-de-compra">calculadora de costos de compra</Link>
+            . La tabla completa, con el IVA y las demás condiciones, está en{" "}
+            <Link href="/honorarios">honorarios</Link>.
           </p>
+          <div className="callout">
+            <p>
+              <strong>Qué recibes y cuándo.</strong> Recibes la orden de corretaje por
+              escrito con el honorario, el alcance y el plazo; la ficha y el aviso
+              publicados; y el acompañamiento hasta la inscripción. El plazo de
+              comercialización no se promete de antemano porque depende del mercado: lo
+              que se acuerda por escrito es el plazo de cada etapa y lo que se entrega en
+              ella.
+            </p>
+          </div>
           <div className="inline-actions">
             <Link href="/#contacto" className="btn-gold">
               Quiero vender

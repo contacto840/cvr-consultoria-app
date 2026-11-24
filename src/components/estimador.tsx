@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { SECTORS_BY_COMMUNE } from "@/lib/seed-data";
-import { ENCARGO } from "@/lib/encargo";
 import { SITE } from "@/lib/site";
 
 const TIPOS = [
@@ -63,12 +62,6 @@ export default function Estimador() {
   const qSup = sp.get("superficie");
   const prellenado = Boolean(qTipo && qComuna && qSup);
 
-  const paymentStatus = sp.get("status");
-  const paymentId = sp.get("payment_id");
-  const paidId = sp.get("id");
-  const simulated = sp.get("simulated") === "true";
-  const debeVerificar = paymentStatus === "approved" && Boolean(paidId);
-
   const [comunas, setComunas] = useState<string[]>([]);
   const [form, setForm] = useState({
     clientName: "",
@@ -84,15 +77,12 @@ export default function Estimador() {
   const [consent, setConsent] = useState(false);
   const [cargando, setCargando] = useState(false);
   const [resultado, setResultado] = useState<Resultado | null>(null);
-  const [error, setError] = useState(
-    paymentStatus === "failed" ? "El pago fue rechazado. Puedes intentarlo de nuevo." : ""
-  );
+  const [error, setError] = useState("");
   const [tasacionId, setTasacionId] = useState("");
-  const [pagando, setPagando] = useState(false);
-  const [verificacion, setVerificacion] = useState<"verificada" | "error" | null>(null);
+  const [solicitando, setSolicitando] = useState(false);
+  const [solicitudOk, setSolicitudOk] = useState(false);
+  const [solicitudError, setSolicitudError] = useState("");
 
-  const verificando = debeVerificar && verificacion === null;
-  const pagoOk = verificacion === "verificada";
   const sectores = SECTORS_BY_COMMUNE[form.comuna] ?? [];
 
   useEffect(() => {
@@ -103,35 +93,6 @@ export default function Estimador() {
       })
       .catch(() => setComunas([]));
   }, []);
-
-  useEffect(() => {
-    if (!debeVerificar || !paidId) return;
-    let cancelado = false;
-    fetch("/api/pagos/confirmar", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ tasacionId: paidId, payment_id: paymentId, simulated }),
-    })
-      .then((res) => res.json())
-      .then((data: { ok?: boolean; error?: string }) => {
-        if (cancelado) return;
-        if (data.ok) {
-          setVerificacion("verificada");
-          setTasacionId(paidId);
-        } else {
-          setVerificacion("error");
-          setError(data.error ?? "No pudimos verificar el pago.");
-        }
-      })
-      .catch(() => {
-        if (cancelado) return;
-        setVerificacion("error");
-        setError("Error de conexión al verificar el pago.");
-      });
-    return () => {
-      cancelado = true;
-    };
-  }, [debeVerificar, paidId, paymentId, simulated]);
 
   function cambiar(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
     const { name, value } = e.target;
@@ -158,7 +119,12 @@ export default function Estimador() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...form, consentimiento: consent }),
       });
-      const data = (await res.json()) as { ok?: boolean; error?: string; result?: Resultado; tasacionId?: string };
+      const data = (await res.json()) as {
+        ok?: boolean;
+        error?: string;
+        result?: Resultado;
+        tasacionId?: string;
+      };
       if (!res.ok || !data.ok || !data.result) {
         throw new Error(data.error ?? "No pudimos calcular la estimación.");
       }
@@ -171,65 +137,33 @@ export default function Estimador() {
     }
   }
 
-  async function pagar() {
-    setPagando(true);
-    setError("");
+  async function pedirCotizacion() {
+    if (!tasacionId) {
+      setSolicitudError(
+        "Falta el número de solicitud. Vuelve a calcular la estimación antes de pedir la cotización."
+      );
+      return;
+    }
+    setSolicitando(true);
+    setSolicitudError("");
     try {
-      const res = await fetch("/api/pagos", {
+      const res = await fetch("/api/tasacion/cotizacion", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ tasacionId }),
       });
-      const data = (await res.json()) as { ok?: boolean; init_point?: string; error?: string };
-      if (data.ok && data.init_point) {
-        window.location.href = data.init_point;
-        return;
+      const data = (await res.json()) as { ok?: boolean; error?: string };
+      if (!res.ok || !data.ok) {
+        throw new Error(data.error ?? "No pudimos enviar la solicitud de cotización.");
       }
-      throw new Error(data.error ?? "No se pudo iniciar el pago.");
+      setSolicitudOk(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "No se pudo iniciar el pago.");
-      setPagando(false);
+      setSolicitudError(
+        err instanceof Error ? err.message : "No pudimos enviar la solicitud de cotización."
+      );
+    } finally {
+      setSolicitando(false);
     }
-  }
-
-  if (verificando) {
-    return (
-      <div className="card" role="status" aria-live="polite">
-        <h2 className="h3">Verificando el pago…</h2>
-        <p className="muted">No cierres esta página. Esto toma unos segundos.</p>
-      </div>
-    );
-  }
-
-  if (pagoOk) {
-    return (
-      <div className="card encargo-ok">
-        <h2 className="h3">Encargo registrado</h2>
-        <p>
-          El pago quedó confirmado y tu encargo entró a la lista de trabajo del perito. La
-          tasación se elabora con revisión del inmueble y se entrega firmada.
-        </p>
-        <p className="pending">{ENCARGO.plazoTexto}</p>
-        <div className="id-box">
-          <span className="muted small">Número de solicitud</span>
-          <code>{tasacionId}</code>
-        </div>
-        <p className="muted small">
-          Enviamos a tu correo la estimación referencial automática. Ese documento no es el
-          producto que compraste ni lleva firma: sirve como referencia mientras se prepara
-          el informe. Si pagaste y no recibes respuesta, escríbenos a{" "}
-          <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.
-        </p>
-        <div className="inline-actions">
-          <Link href="/" className="btn-outline">
-            Volver al inicio
-          </Link>
-          <a href={SITE.tasacionesUrl} className="btn-gold" rel="noopener">
-            Ir a tasaciones y peritajes ↗
-          </a>
-        </div>
-      </div>
-    );
   }
 
   if (resultado) {
@@ -238,6 +172,10 @@ export default function Estimador() {
       <div className="estimador-resultado">
         <div className="card">
           <p className="eyebrow">Estimación referencial</p>
+          <p className="hint">
+            Esta estimación es gratuita. No genera cobro ni encargo: el informe firmado se
+            cotiza aparte, por escrito.
+          </p>
           <h2 className="value-big">{fmt(resultado.estimatedValueUF, 1)} UF</h2>
           {resultado.estimatedValueCLP !== null && resultado.ufValueCLP !== null ? (
             <>
@@ -318,22 +256,38 @@ export default function Estimador() {
 
         <div className="grid two-col">
           <div className="card service-card featured">
-            <span className="tag">Trabajo humano</span>
-            <h2 className="h3">{ENCARGO.nombre}</h2>
+            <span className="tag">Se cotiza</span>
+            <h2 className="h3">Informe de tasación con inspección y firma</h2>
             <p>
-              El perito revisa los antecedentes, inspecciona el inmueble y emite un informe
-              firmado. No es una descarga automática: es un encargo que se trabaja y se
-              entrega con responsabilidad profesional.
+              La revisión la hace una persona: antecedentes, inspección del inmueble cuando
+              corresponde e informe firmado. No es una descarga automática y no se cobra en
+              línea.
             </p>
-            <p className="muted small">{ENCARGO.plazoTexto}</p>
-            <p className="price">${fmt(ENCARGO.precioCLP)} CLP</p>
-            <button type="button" className="btn-gold" onClick={pagar} disabled={pagando}>
-              {pagando ? "Redirigiendo a MercadoPago…" : "Encargar la tasación"}
-            </button>
-            <p className="hint">
-              Al pagar se abre MercadoPago. El encargo queda registrado con el número de
-              solicitud que aparece en esta página.
+            <p>
+              Envías la solicitud con los datos de esta estimación y CVR responde por
+              escrito con el honorario y el plazo. Nada se cobra antes de que aceptes esa
+              cotización.
             </p>
+            {solicitudOk ? (
+              <p className="notice small" role="status">
+                Solicitud de cotización enviada. Te respondemos a{" "}
+                <strong>{form.clientEmail}</strong> con el honorario y el plazo por escrito.
+              </p>
+            ) : (
+              <button
+                type="button"
+                className="btn-gold"
+                onClick={pedirCotizacion}
+                disabled={solicitando}
+              >
+                {solicitando ? "Enviando la solicitud…" : "Pedir cotización"}
+              </button>
+            )}
+            {solicitudError && (
+              <p className="form-error" role="alert">
+                {solicitudError}
+              </p>
+            )}
           </div>
 
           <div className="card service-card">
@@ -361,6 +315,8 @@ export default function Estimador() {
             onClick={() => {
               setResultado(null);
               setTasacionId("");
+              setSolicitudOk(false);
+              setSolicitudError("");
             }}
           >
             Hacer otra estimación
@@ -368,10 +324,13 @@ export default function Estimador() {
         </p>
 
         <p>
-          ¿Necesitas el documento para un banco, un tribunal o una herencia?{" "}
-          <a href={SITE.tasaciones.tasacionComercial} rel="noopener">
-            Pedir una tasación con firma ↗
+          La estimación en línea queda como referencia. Si el documento se necesita para un
+          banco, un tribunal o una herencia, se pide la cotización del informe firmado en la
+          tarjeta de arriba o en{" "}
+          <a href={SITE.tasacionesUrl} rel="noopener">
+            cvrtasaciones.cl
           </a>
+          .
         </p>
       </div>
     );
@@ -553,8 +512,13 @@ export default function Estimador() {
       )}
 
       <button type="submit" className="btn-gold" disabled={cargando || !consent}>
-        {cargando ? "Calculando…" : "Calcular estimación"}
+        {cargando ? "Calculando…" : "Calcular estimación gratis"}
       </button>
+
+      <p className="hint">
+        Calcular no tiene costo y no crea un encargo. Si después pides el informe firmado,
+        recibes primero una cotización por escrito con el honorario y el plazo.
+      </p>
 
       <p className="disclaimer">
         El resultado es una estimación referencial y automática. No constituye una tasación,

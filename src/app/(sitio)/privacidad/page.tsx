@@ -4,12 +4,12 @@ import { SITE } from "@/lib/site";
 export const metadata: Metadata = {
   title: "Política de privacidad",
   description:
-    "Cómo trata CVR Propiedades SpA los datos personales que recibe en este sitio: finalidades, base de licitud, conservación, destinatarios y derechos del titular.",
+    "Cómo trata CVR Propiedades SpA los datos personales que recibe en este sitio: finalidades, base de licitud, conservación, destinatarios, transferencias internacionales y derechos del titular.",
   alternates: { canonical: "/privacidad" },
   robots: { index: true, follow: true },
 };
 
-const ACTUALIZADO = "20 de noviembre de 2026";
+const ACTUALIZADO = "23 de noviembre de 2026";
 
 export default function PrivacidadPage() {
   return (
@@ -19,9 +19,9 @@ export default function PrivacidadPage() {
           <p className="eyebrow">Legal</p>
           <h1 className="page-title">Política de privacidad</h1>
           <p className="page-lead">
-            Tratamos datos personales de quienes consultan, publican una propiedad o
-            encargan un informe. Esta política explica qué datos son, para qué se usan y
-            cómo ejercer los derechos que reconoce la Ley 21.719.
+            Tratamos datos personales de quienes consultan, publican una propiedad o piden
+            una estimación. Esta política explica qué datos son, para qué se usan, dónde se
+            alojan y cómo ejercer los derechos que reconoce la Ley 21.719.
           </p>
           <p className="hint">Última actualización: {ACTUALIZADO}.</p>
         </div>
@@ -38,12 +38,14 @@ export default function PrivacidadPage() {
           <h2>1. Responsable del tratamiento</h2>
           <p>
             El responsable es <strong>{SITE.legalName}</strong>, RUT{" "}
-            <strong>{"78.342.064-3"}</strong>, con domicilio en {SITE.city},{" "}
-            {SITE.region}, Chile. Canal de contacto para materias de datos personales:{" "}
+            <strong>78.342.064-3</strong>, con domicilio en Chillán, Región de Ñuble, Chile.
+            Canal de contacto para materias de datos personales:{" "}
             <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.
           </p>
-          <p className="pending">
-            {"{{PENDIENTE: domicilio legal y correo de privacidad definitivos, confirmar con Carlos}}"}
+          <p>
+            No se publica una dirección de calle: la atención se coordina por correo,
+            teléfono o WhatsApp, y la dirección exacta se entrega cuando corresponde a una
+            operación en curso.
           </p>
 
           <h2>2. Qué datos tratamos y para qué</h2>
@@ -52,7 +54,12 @@ export default function PrivacidadPage() {
             datos sensibles y no usamos los datos para publicidad de terceros.
           </p>
 
-          <div className="table-wrap" role="region" tabIndex={0} aria-label="Datos que se tratan y con que finalidad, tabla desplazable">
+          <div
+            className="table-wrap"
+            role="region"
+            tabIndex={0}
+            aria-label="Datos que se tratan y con qué finalidad, tabla desplazable"
+          >
             <table className="data-table">
               <caption className="sr-only">
                 Datos personales tratados, finalidad, base de licitud y conservación
@@ -70,7 +77,7 @@ export default function PrivacidadPage() {
                   <th scope="row">Nombre, correo y teléfono del formulario de contacto</th>
                   <td>Responder la consulta y coordinar la atención.</td>
                   <td>Consentimiento del titular al enviar el formulario.</td>
-                  <td>{"{{PENDIENTE: plazo de conservación de consultas}}"}</td>
+                  <td>12 meses desde la última interacción.</td>
                 </tr>
                 <tr>
                   <th scope="row">
@@ -78,25 +85,11 @@ export default function PrivacidadPage() {
                     superficie, estado, antigüedad)
                   </th>
                   <td>
-                    Calcular la estimación referencial, emitirla y contactar al solicitante
-                    por esa solicitud.
+                    Calcular la estimación referencial, emitirla, cotizar el informe cuando
+                    se solicita y contactar al solicitante por esa solicitud.
                   </td>
                   <td>Consentimiento del titular, marcado en la casilla del formulario.</td>
-                  <td>{"{{PENDIENTE: plazo de conservación de solicitudes de estimación}}"}</td>
-                </tr>
-                <tr>
-                  <th scope="row">Datos de la operación pagada (identificador de solicitud, estado del pago)</th>
-                  <td>Gestionar el encargo y acreditar el pago.</td>
-                  <td>Ejecución del contrato entre el titular y CVR Propiedades SpA.</td>
-                  <td>Mientras dure la relación y los plazos legales aplicables.</td>
-                </tr>
-                <tr>
-                  <th scope="row">Datos de pago (tarjeta, medio de pago)</th>
-                  <td>Procesar el pago del encargo.</td>
-                  <td>Ejecución del contrato, a través del procesador de pagos.</td>
-                  <td>
-                    No los almacenamos: los trata MercadoPago según sus propias políticas.
-                  </td>
+                  <td>24 meses desde la solicitud.</td>
                 </tr>
                 <tr>
                   <th scope="row">
@@ -105,11 +98,15 @@ export default function PrivacidadPage() {
                   </th>
                   <td>Revisar y publicar el aviso, y contactar al anunciante.</td>
                   <td>Consentimiento del anunciante al enviar el formulario.</td>
-                  <td>{"{{PENDIENTE: plazo de conservación de publicaciones}}"}</td>
+                  <td>Mientras la publicación esté activa, más 12 meses.</td>
                 </tr>
               </tbody>
             </table>
           </div>
+
+          <p className="pending">
+            Plazos propuestos de conservación, pendientes de revisión legal.
+          </p>
 
           <p>
             <strong>Lo que no hacemos:</strong> no usamos cookies no esenciales, no
@@ -124,32 +121,68 @@ export default function PrivacidadPage() {
           </p>
           <ul className="check-list">
             <li>
-              <strong>MercadoPago</strong>, como procesador de pagos. Recibe los datos
-              necesarios para cobrar el encargo.
+              <strong>Neon (Neon, Inc.)</strong>, como encargado de la base de datos donde
+              se almacenan las solicitudes y las publicaciones.
             </li>
             <li>
-              <strong>Proveedor de correo electrónico</strong>, para enviar la estimación y
-              las comunicaciones del encargo.
+              <strong>Vercel (Vercel Inc.)</strong>, como encargado del alojamiento y de la
+              ejecución del sitio.
             </li>
             <li>
-              <strong>Proveedor de alojamiento y base de datos</strong>, donde se almacenan
-              las solicitudes y las publicaciones.
+              <strong>Proveedor de correo electrónico</strong>, como encargado del envío de
+              la estimación y de los avisos internos del sitio.
             </li>
           </ul>
           <p>
-            No vendemos ni cedemos datos personales a terceros con fines publicitarios.
-            Podemos entregar información cuando exista una obligación legal o un
-            requerimiento de autoridad competente.
+            El sitio no cobra en línea y no procesa pagos, así que no hay un procesador de
+            pagos entre los destinatarios. No vendemos ni cedemos datos personales a
+            terceros con fines publicitarios. Podemos entregar información cuando exista
+            una obligación legal o un requerimiento de autoridad competente.
           </p>
 
           <h2>4. Transferencias internacionales</h2>
           <p>
-            Los proveedores de alojamiento, base de datos y pagos pueden almacenar
-            información fuera de Chile. En ese caso el tratamiento se sujeta a las
-            condiciones contractuales del proveedor y a la normativa aplicable.
+            <strong>Sección pendiente de revisión legal.</strong> Los datos personales que
+            se envían por los formularios salen de Chile y se tratan fuera del país. Esto es
+            lo que se puede acreditar hoy, con el encargado y el instrumento de cada
+            tratamiento:
           </p>
-          <p className="pending">
-            {"{{PENDIENTE: detalle de países de destino y cláusulas contractuales de cada encargado}}"}
+          <ul className="check-list">
+            <li>
+              <strong>Base de datos: Neon (Neon, Inc.).</strong> La cadena de conexión
+              configurada apunta a la región <strong>sa-east-1</strong>, que corresponde a
+              la infraestructura de AWS en <strong>São Paulo, Brasil</strong>. Neon es
+              encargado del tratamiento. Instrumento: el Data Processing Addendum de Neon,
+              que incorpora las Cláusulas Contractuales Tipo de la Comisión Europea
+              (2021/914) y el Marco de Privacidad de Datos entre la Unión Europea y Estados
+              Unidos. Neon, Inc. puede acceder a los datos desde{" "}
+              <strong>Estados Unidos</strong> y desde las jurisdicciones donde operan sus
+              subencargados.
+            </li>
+            <li>
+              <strong>Alojamiento: Vercel (Vercel Inc.).</strong> Vercel es encargado del
+              tratamiento. Su Data Processing Addendum declara que sus instalaciones
+              principales de procesamiento están en <strong>Estados Unidos</strong> y que
+              puede transferir datos a ese país y a donde operan sus subencargados.
+              Instrumento: el Data Processing Addendum de Vercel, aplicable a los planes Pro
+              y Enterprise, con las Cláusulas Contractuales Tipo (2021/914). La región
+              específica de ejecución de las funciones{" "}
+              <strong>no está determinada en los archivos del proyecto</strong>:{" "}
+              {"{{PENDIENTE: confirmar la región del proyecto en Vercel}}"}.
+            </li>
+            <li>
+              <strong>Correo: proveedor SMTP (por defecto, Gmail de Google).</strong> Se usa
+              para enviar la estimación y los avisos internos. Instrumento: el acuerdo de
+              tratamiento de datos de Google Workspace o Google Cloud, según la cuenta que
+              se use. La cuenta y el país de procesamiento{" "}
+              <strong>no están determinados en los archivos del proyecto</strong>:{" "}
+              {"{{PENDIENTE: confirmar proveedor y país de correo}}"}.
+            </li>
+          </ul>
+          <p>
+            No se transfieren datos a otros países por analítica, publicidad ni cookies: el
+            sitio no las usa. Si cambia un proveedor o una región, esta sección se actualiza
+            antes de seguir tratando datos con ese proveedor.
           </p>
 
           <h2>5. Plazo de conservación</h2>
@@ -158,8 +191,11 @@ export default function PrivacidadPage() {
             recolectaron y, después, durante los plazos de prescripción o de conservación
             que exija la ley. Cuando dejan de ser necesarios se eliminan o se anonimizan.
           </p>
-          <p className="pending">
-            {"{{PENDIENTE: plazos concretos por categoría, definir con la abogada}}"}
+          <p>
+            Los plazos propuestos son los de la tabla anterior: 12 meses para las consultas
+            de contacto, 24 meses para las solicitudes de estimación y, para las
+            publicaciones de propiedades, mientras estén activas más 12 meses. Son una
+            política propuesta y están pendientes de revisión legal.
           </p>
 
           <h2>6. Derechos del titular</h2>
@@ -168,7 +204,10 @@ export default function PrivacidadPage() {
             supresión, oposición y portabilidad, además del derecho a oponerse al
             tratamiento de datos para fines de marketing directo.
           </p>
-          <p>Para ejercerlos, escribe a <a href={`mailto:${SITE.email}`}>{SITE.email}</a> indicando:</p>
+          <p>
+            Para ejercerlos, escribe a <a href={`mailto:${SITE.email}`}>{SITE.email}</a>{" "}
+            indicando:
+          </p>
           <ul className="check-list">
             <li>Tu nombre completo y un medio para responderte.</li>
             <li>El derecho que ejerces.</li>
@@ -205,7 +244,7 @@ export default function PrivacidadPage() {
           <p>
             {SITE.legalName}
             <br />
-            {SITE.city}, {SITE.region}, Chile
+            Chillán, Región de Ñuble, Chile
             <br />
             <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
             <br />

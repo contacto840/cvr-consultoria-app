@@ -9,6 +9,7 @@ const RUTAS = [
   "/servicios/venta",
   "/servicios/arriendo",
   "/servicios/asesoria-de-compra",
+  "/honorarios",
   "/herramientas/costos-de-compra",
   "/herramientas/diagnostico-predio",
   "/tasacion",

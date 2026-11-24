@@ -60,13 +60,13 @@ export async function sendEstimacionReferencial(opts: {
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6f9;padding:40px 20px;">
     <tr><td align="center">
       <table width="600" cellpadding="0" cellspacing="0" style="background:#050c17;border-radius:12px;overflow:hidden;max-width:600px;">
-        <tr><td style="background:#050c17;border-bottom:3px solid #c5a85b;padding:28px 40px;">
+        <tr><td style="background:#050c17;border-bottom:3px solid #c9a84c;padding:28px 40px;">
           <span style="font-size:26px;font-weight:900;color:#ffffff;letter-spacing:-1px;">CVR</span>
           <span style="font-size:11px;color:#8fa3bc;letter-spacing:3px;text-transform:uppercase;margin-left:8px;">Propiedades</span>
         </td></tr>
 
         <tr><td style="padding:36px 40px;color:#f0f4f8;">
-          <p style="font-size:20px;font-weight:700;margin:0 0 16px;color:#c5a85b;">Tu estimación referencial</p>
+          <p style="font-size:20px;font-weight:700;margin:0 0 16px;color:#c9a84c;">Tu estimación referencial</p>
           <p style="margin:0 0 16px;color:#8fa3bc;line-height:1.7;">
             Hola <strong style="color:#f0f4f8;">${opts.clientName}</strong>,<br><br>
             Adjuntamos la estimación referencial calculada a partir de los datos que ingresaste.
@@ -79,7 +79,7 @@ export async function sendEstimacionReferencial(opts: {
             </td></tr>
           </table>
 
-          <p style="margin:0 0 12px;padding:14px;border-left:3px solid #c5a85b;background:#0d1f36;color:#8fa3bc;font-size:13px;line-height:1.7;">
+          <p style="margin:0 0 12px;padding:14px;border-left:3px solid #c9a84c;background:#0d1f36;color:#8fa3bc;font-size:13px;line-height:1.7;">
             <strong style="color:#f0f4f8;">Esto no es una tasación.</strong>
             Es un cálculo automático, sin inspección del inmueble ni revisión profesional.
             No sirve para trámites bancarios, judiciales, hereditarios ni de compraventa.
@@ -91,7 +91,7 @@ export async function sendEstimacionReferencial(opts: {
             te contactará para coordinar la inspección.
           </p>
           <a href="https://wa.me/${SITE.phoneE164}?text=Hola%20CVR%2C%20tengo%20una%20consulta%20sobre%20la%20solicitud%20${opts.tasacionId}"
-            style="display:inline-block;margin-top:16px;background:#c5a85b;color:#050c17;font-weight:700;font-size:13px;padding:12px 24px;border-radius:8px;text-decoration:none;">
+            style="display:inline-block;margin-top:16px;background:#c9a84c;color:#050c17;font-weight:700;font-size:13px;padding:12px 24px;border-radius:8px;text-decoration:none;">
             Consultar por WhatsApp
           </a>
         </td></tr>

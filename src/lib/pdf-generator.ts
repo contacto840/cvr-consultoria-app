@@ -17,7 +17,7 @@ import type { PDFPage, PDFFont } from "pdf-lib";
  * tasaciones y peritajes.
  */
 
-const GOLD = rgb(0.773, 0.659, 0.357); // #c5a85b
+const GOLD = rgb(0.788, 0.659, 0.298); // #c9a84c
 const NAVY = rgb(0.020, 0.047, 0.09); // #050c17
 const DARK = rgb(0.051, 0.086, 0.149); // #0d1624
 const GRAY = rgb(0.561, 0.639, 0.737); // #8fa3bc
@@ -305,7 +305,7 @@ export async function generateTasacionPDF(data: EstimacionData): Promise<Uint8Ar
 
   y -= 12;
   if (conversion) {
-    const fechaUf = data.ufDate ? ` (solicitud del ${fechaChile(data.ufDate)})` : "";
+    const fechaUf = data.ufDate ? ` (UF del ${fechaChile(data.ufDate)})` : "";
     y = paragraph(
       page,
       `El equivalente en pesos se calcula con el valor de la UF aplicado en el cálculo: $${UF(
@@ -336,7 +336,7 @@ export async function generateTasacionPDF(data: EstimacionData): Promise<Uint8Ar
   y -= 14;
   y = paragraph(
     page,
-    "Lo que este cálculo no hace: no inspecciona el inmueble, no verifica la superficie ni el estado declarado, no homologa comparables, no revisa títulos, cargas ni derechos de agua y no aplica una norma de tasación.",
+    "Lo que este cálculo no hace: no inspecciona el inmueble, no verifica la superficie ni el estado declarado, no homologa comparables y no revisa títulos, cargas ni derechos de agua.",
     30,
     y,
     regular,
@@ -365,7 +365,7 @@ export async function generateTasacionPDF(data: EstimacionData): Promise<Uint8Ar
     color: WHITE,
   });
   page.drawText(
-    "Documento generado automáticamente. No lleva firma ni representa la opinión de un perito.",
+    "Documento generado automáticamente. No lleva firma ni representa la opinión de un profesional.",
     { x: 30, y: y - 24, size: 7, font: italic, color: GRAY }
   );
 

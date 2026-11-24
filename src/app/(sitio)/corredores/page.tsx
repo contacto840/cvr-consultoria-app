@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import JsonLd from "@/components/json-ld";
+import { honorarioDe } from "@/lib/honorarios";
 import { SITE, waLink } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -48,6 +49,7 @@ const BENEFICIOS = [
 ];
 
 export default function CorredoresPage() {
+  const honorario = honorarioDe("corredores");
   return (
     <>
       <JsonLd data={serviceLd} />
@@ -103,19 +105,21 @@ export default function CorredoresPage() {
 
           <h2 className="section-title">Condiciones comerciales</h2>
           <p>
-            No publicamos planes ni precios en esta página porque no existe un tarifario
-            único: cada acuerdo depende del tipo de operación, del trabajo que aporta cada
-            parte y de si la propiedad requiere revisión documental.
+            <strong>{honorario.honorario}.</strong> {honorario.determina} Es decir: si tú
+            aportas el comprador o la propiedad, te corresponde la mitad de la comisión de
+            esa parte. El reparto se acuerda por escrito para cada operación antes de
+            empezar, junto con el trabajo que aporta cada uno.
           </p>
-          <p className="pending">
-            {"{{PENDIENTE: condiciones y comisiones del programa de corredores, definir con Carlos}}"}
+          <p>
+            No hay permanencia ni cuotas de entrada. El IVA se declara por separado y la
+            tabla completa está en <Link href="/honorarios">honorarios</Link>.
           </p>
 
           <div className="callout">
             <p>
               <strong>Lo que no prometemos:</strong> informes firmados automáticos, validez
-              bancaria sin revisión, ni plazos que no dependan del perito. Los informes
-              firmados se emiten en la línea de{" "}
+              bancaria sin revisión, ni plazos que no dependan de la revisión profesional.
+              Los informes firmados se emiten en la línea de{" "}
               <a href={SITE.tasacionesUrl} rel="noopener">
                 tasaciones y peritajes
               </a>

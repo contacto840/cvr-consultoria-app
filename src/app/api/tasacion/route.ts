@@ -129,10 +129,11 @@ export async function POST(req: NextRequest) {
 
     // La conversión a pesos depende del valor oficial de la UF del día (SII).
     // Si la fuente no responde, no se inventa una cifra: la estimación queda
-    // solo en UF y `estimatedValueCLP` se guarda en 0 como marca de "no
-    // disponible" (la columna es Float obligatoria en el esquema actual).
+    // solo en UF y se guardan `ufValueCLP`/`ufDate` para no reconstruir la
+    // conversión desde el monto. `estimatedValueCLP` queda null en ese caso.
     const uf = await obtenerUfDelDia();
     const estimatedValueCLP = uf ? Math.round(estimatedValueUF * uf.valorCLP) : null;
+    const ufDate = uf ? new Date(`${uf.fecha}T12:00:00Z`) : null;
 
     const record = await prisma.tasacionRequest.create({
       data: {
@@ -145,7 +146,9 @@ export async function POST(req: NextRequest) {
         surface,
         condition,
         estimatedValueUF,
-        estimatedValueCLP: estimatedValueCLP ?? 0,
+        estimatedValueCLP,
+        ufValueCLP: uf?.valorCLP ?? null,
+        ufDate,
         paymentStatus: "pending",
       },
     });
