@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import JsonLd from "@/components/json-ld";
+import { honorarioDe } from "@/lib/honorarios";
 import { SITE } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -29,6 +30,8 @@ const serviceLd = {
 };
 
 export default function ArriendoPage() {
+  const colocacion = honorarioDe("arriendo");
+  const administracion = honorarioDe("administracion");
   return (
     <>
       <JsonLd data={serviceLd} />
@@ -102,12 +105,44 @@ export default function ArriendoPage() {
           </p>
           <h2 className="section-title">Honorarios</h2>
           <p>
-            La comisión por colocación y el costo de la administración mensual se pactan por
-            escrito según el tipo de propiedad y el nivel de servicio.
+            <strong>Colocación: {colocacion.honorario}.</strong>{" "}
+            {colocacion.determina} <strong>Administración mensual:{" "}
+            {administracion.honorario}.</strong> Se cobra a la parte que encarga la
+            gestión y se declara por escrito en el contrato.
           </p>
-          <p className="pending">
-            {"{{PENDIENTE: honorarios de arriendo y administración, definir con Carlos}}"}
+          <p>
+            El honorario se fija por escrito antes de empezar y no varía después, salvo
+            que cambie el alcance acordado. El IVA se declara por separado. La tabla
+            completa está en <Link href="/honorarios">honorarios</Link>.
           </p>
+
+          <div className="grid two-col">
+            <div className="card">
+              <h3>Qué recibes y cuándo</h3>
+              <ul className="check-list">
+                <li>La verificación del arrendatario y la recomendación, por escrito.</li>
+                <li>El contrato y el inventario firmados antes de la entrega.</li>
+                <li>La liquidación mensual con el detalle de gastos.</li>
+                <li>
+                  El plazo se acuerda por escrito al aceptar el encargo. La colocación
+                  depende del mercado y no se promete una fecha que no se controle.
+                </li>
+              </ul>
+            </div>
+            <div className="card">
+              <h3>Lo que no incluye</h3>
+              <ul className="check-list">
+                <li>
+                  Obras y reparaciones: las coordina CVR, pero el costo lo paga el
+                  propietario.
+                </li>
+                <li>Cobranza judicial y juicios de arriendo: se derivan a abogado.</li>
+                <li>Regularizaciones, permisos y trámites municipales.</li>
+                <li>Informes de tasación firmados: se contratan en la línea pericial.</li>
+              </ul>
+            </div>
+          </div>
+
           <div className="inline-actions">
             <Link href="/#contacto" className="btn-gold">
               Quiero arrendar mi propiedad

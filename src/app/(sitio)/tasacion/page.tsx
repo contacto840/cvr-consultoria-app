@@ -25,13 +25,15 @@ export default function TasacionPage() {
           <p className="page-lead">
             Un rango de precio para orientar una decisión de venta o compra. Se calcula con
             valores de mercado por comuna, sector y tipo de propiedad, y muestra la muestra
-            y el año de esos valores.
+            y el año de esos valores. La estimación en línea es gratuita y no genera cobro.
           </p>
           <div className="notice notice-top" role="note">
             <strong>No es una tasación.</strong> Es una estimación automática, sin
             inspección del inmueble ni homologación de comparables. No sirve para trámites
             bancarios, judiciales, hereditarios ni de compraventa: para eso se requiere un
-            informe de tasación con inspección y firma.
+            informe de tasación con inspección y firma. Ese informe <strong>se cotiza por
+            escrito</strong>: la solicitud no cobra nada y CVR responde con el honorario y
+            el plazo antes de empezar.
           </div>
         </div>
       </section>

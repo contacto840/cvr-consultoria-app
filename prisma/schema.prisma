@@ -33,8 +33,12 @@ model TasacionRequest {
   surface           Float
   condition         String   @default("normal")
   estimatedValueUF  Float
-  estimatedValueCLP Float
-  paymentStatus     String   @default("pending") // "pending", "paid"
+  /** null cuando no se pudo obtener la UF: la estimación queda solo en UF. */
+  estimatedValueCLP Float?
+  /** Valor de la UF usado en la conversión, con su fecha, para no reconstruirlo. */
+  ufValueCLP        Float?
+  ufDate            DateTime?
+  paymentStatus     String   @default("pending") // legado del flujo de pago en línea, ya sin uso en la interfaz
   paymentId         String?
   createdAt         DateTime @default(now())
 }

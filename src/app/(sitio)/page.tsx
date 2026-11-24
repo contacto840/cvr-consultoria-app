@@ -188,13 +188,16 @@ export default function Home() {
               Carlos Vivanco Riquelme
             </h2>
             <p>
-              Fundador de CVR Propiedades SpA. Administrador Público, con formación en
-              tasación, corretaje y gestión inmobiliaria. La credibilidad de este sitio no
-              se apoya en una cifra de años: se apoya en credenciales que se pueden
-              verificar una por una.
+              Fundador de CVR Propiedades SpA. Su formación inmobiliaria parte en 2022 y
+              se puede verificar documento por documento. La credibilidad de este sitio no
+              se apoya en una cifra de trayectoria: se apoya en lo que estudió, cuándo y
+              dónde.
             </p>
-            <p className="small muted">
-              {"{{PENDIENTE: calificación profesional exacta, confirmar con Carlos}}"}
+            <p>
+              Administrador Público, diplomado en Tasación Inmobiliaria y Agrícola (Braniff
+              Institute, 2022), aprobado en el Curso de Tasación Inmobiliaria de la
+              Universidad Adolfo Ibáñez (2026) y diplomado en Recursos Hídricos
+              (Universidad de Concepción, 2026).
             </p>
           </div>
           <div className="card">
@@ -205,8 +208,8 @@ export default function Home() {
               ))}
             </ul>
             <p className="hint">
-              Los certificados están disponibles para revisión en la entrevista. Las
-              credenciales académicas no reemplazan la revisión de cada inmueble.
+              Los respaldos documentales están disponibles para revisión en la entrevista.
+              Las credenciales académicas no reemplazan la revisión de cada inmueble.
             </p>
           </div>
         </div>

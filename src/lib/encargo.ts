@@ -1,13 +1,16 @@
 /**
  * Datos del encargo de tasación con inspección y firma.
  *
- * El precio es el que ya cobra MercadoPago en este repositorio: se centraliza
- * acá para que la preferencia de pago y la interfaz no puedan desincronizarse.
- * Sigue pendiente la confirmación comercial de Carlos.
+ * El informe dejó de venderse con cobro en línea: se cotiza. El precio y el
+ * nombre se conservan porque los usa el código de pagos heredado
+ * (/api/pagos), que ya no es alcanzable desde la interfaz. No se publican como
+ * oferta en ninguna página.
+ *
+ * El plazo no se inventa: se acuerda por escrito al aceptar el encargo.
  */
 export const ENCARGO = {
+  /** Precio legado del flujo de MercadoPago; sin uso en la interfaz. */
   precioCLP: 15000,
-  /** El plazo real de entrega lo define el perito: no se inventa una cifra. */
-  plazoTexto: "{{PENDIENTE: plazo de entrega del encargo de tasación, confirmar con Carlos}}",
+  plazoTexto: "El plazo se acuerda por escrito al aceptar el encargo.",
   nombre: "Encargo de tasación con inspección y firma",
 } as const;

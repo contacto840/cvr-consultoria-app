@@ -6,6 +6,7 @@ const SERVICIOS = [
   { href: "/servicios/arriendo", label: "Arriendo y administración" },
   { href: "/servicios/asesoria-de-compra", label: "Asesoría de compra" },
   { href: "/propiedades", label: "Propiedades disponibles" },
+  { href: "/honorarios", label: "Honorarios" },
   { href: "/corredores", label: "Corredores asociados" },
 ];
 

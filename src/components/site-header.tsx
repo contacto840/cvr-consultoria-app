@@ -11,6 +11,7 @@ const LINKS = [
   { href: "/servicios/arriendo", label: "Arrendar" },
   { href: "/servicios/asesoria-de-compra", label: "Comprar" },
   { href: "/herramientas/diagnostico-predio", label: "Diagnóstico" },
+  { href: "/honorarios", label: "Honorarios" },
   { href: "/corredores", label: "Corredores" },
 ];
 
@@ -51,16 +52,6 @@ export default function SiteHeader() {
                 </Link>
               </li>
             ))}
-            <li>
-              <a
-                className="nav-link nav-external"
-                href={SITE.tasacionesUrl}
-                rel="noopener"
-              >
-                Tasaciones y peritajes
-                <span aria-hidden="true"> ↗</span>
-              </a>
-            </li>
           </ul>
         </nav>
 

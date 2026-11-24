@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import JsonLd from "@/components/json-ld";
+import { honorarioDe } from "@/lib/honorarios";
 import { SITE } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -56,6 +57,7 @@ const REVISIONES = [
 ];
 
 export default function AsesoriaCompraPage() {
+  const honorario = honorarioDe("asesoria");
   return (
     <>
       <JsonLd data={serviceLd} />
@@ -133,13 +135,57 @@ export default function AsesoriaCompraPage() {
         <div className="container narrow">
           <h2 className="section-title">Honorarios</h2>
           <p>
-            El acompañamiento se cotiza según el tipo de inmueble, la cantidad de
-            documentos a revisar y el grado de participación solicitado. Los informes
-            firmados se cotizan por separado en la línea pericial.
+            <strong>{honorario.honorario}.</strong> {honorario.determina} Lo paga quien
+            contrata la asesoría, con el IVA declarado por separado, y se fija por escrito
+            antes de empezar.
           </p>
-          <p className="pending">
-            {"{{PENDIENTE: honorarios de asesoría de compra, definir con Carlos}}"}
+          <p>
+            Que sea fijo y no un porcentaje del precio es a propósito. Un porcentaje hace
+            ganar más al asesor cuando el cliente compra y cuando compra caro: exactamente
+            el conflicto de interés que este servicio dice resolver. Con honorario fijo, a
+            CVR le da lo mismo si el cliente compra o se arrepiente, y eso es lo que está
+            comprando.
           </p>
+          <p>
+            «Desde» es un mínimo real: por debajo de ese honorario no se toma el encargo.
+            Si el alcance cambia —más inmuebles, más documentos, más acompañamiento— se
+            escribe antes de seguir, no se ajusta al final. La tabla completa está en{" "}
+            <Link href="/honorarios">honorarios</Link>.
+          </p>
+
+          <div className="grid two-col">
+            <div className="card">
+              <h3>Qué recibes y cuándo</h3>
+              <ul className="check-list">
+                <li>
+                  Un resumen escrito de lo revisado: documentos vistos, señales de alerta
+                  y lo que falta antes de firmar.
+                </li>
+                <li>
+                  La coordinación del estudio de títulos y del due diligence cuando el caso
+                  los requiere.
+                </li>
+                <li>El acompañamiento de la operación hasta la inscripción.</li>
+                <li>
+                  El plazo se fija por escrito en la cotización, antes de empezar. No se
+                  prometen días que dependan de terceros.
+                </li>
+              </ul>
+            </div>
+            <div className="card">
+              <h3>Lo que no incluye</h3>
+              <ul className="check-list">
+                <li>
+                  Informes firmados de títulos, due diligence o tasación: se cotizan en la
+                  línea pericial.
+                </li>
+                <li>Asesoría legal de las partes: cada parte puede tener la suya.</li>
+                <li>Obras, regularizaciones y trámites municipales.</li>
+                <li>Representación judicial o defensa en un juicio.</li>
+              </ul>
+            </div>
+          </div>
+
           <div className="inline-actions">
             <Link href="/#contacto" className="btn-gold">
               Quiero asesoría para comprar

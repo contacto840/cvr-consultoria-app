@@ -39,7 +39,9 @@ interface TasacionRecord {
   propertyType: string;
   surface: number;
   estimatedValueUF: number;
-  estimatedValueCLP: number;
+  estimatedValueCLP: number | null;
+  ufValueCLP: number | null;
+  ufDate: string | null;
   paymentStatus: string;
   createdAt: string;
 }
@@ -652,15 +654,17 @@ export default function AdminPage() {
                           <td>{fmtUF(t.estimatedValueUF)}</td>
                           <td>
                             <span
-                              className={t.paymentStatus === "paid" ? "badge badge-ok" : "badge badge-warn"}
+                              className={`badge ${t.paymentStatus === "paid" ? "badge-warn" : "badge-ok"}`}
                             >
-                              {t.paymentStatus === "paid" ? "Pagado" : "Pendiente"}
+                              {t.paymentStatus === "paid" ? "Pagado (legado)" : "Sin cobro"}
                             </span>
                             <div className="small muted">
-                              {t.estimatedValueCLP > 0 && t.estimatedValueUF > 0
+                              {t.estimatedValueCLP !== null &&
+                              t.ufValueCLP !== null &&
+                              t.estimatedValueUF > 0
                                 ? `${fmtCLP(t.estimatedValueCLP)} · UF $${fmtUF2(
-                                    Math.round((t.estimatedValueCLP / t.estimatedValueUF) * 100) / 100
-                                  )} del ${fmtFecha(t.createdAt)}`
+                                    t.ufValueCLP
+                                  )}${t.ufDate ? ` del ${fmtFecha(t.ufDate)}` : ""}`
                                 : "Sin conversión a pesos"}
                             </div>
                           </td>

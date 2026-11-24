@@ -8,6 +8,10 @@ import { sendEstimacionReferencial } from "@/lib/mailer";
  *
  * Ojo: lo que se envía es la estimación, no un informe firmado. El informe del
  * encargo lo elabora el perito y no se emite desde este flujo.
+ *
+ * ESTADO: este camino quedó sin uso. El informe de tasación se cotiza y el
+ * cobro en línea se retiró de la interfaz; /api/pagos y /api/pagos/confirmar
+ * siguen existiendo, pero nada del sitio los alcanza.
  */
 export async function cumplirEncargo(tasacionId: string, paymentId: string) {
   const record = await prisma.tasacionRequest.findUnique({ where: { id: tasacionId } });
@@ -37,9 +41,13 @@ export async function cumplirEncargo(tasacionId: string, paymentId: string) {
 
   try {
     const valorM2 = record.surface > 0 ? record.estimatedValueUF / record.surface : 0;
-    // El registro guarda 0 en `estimatedValueCLP` cuando la UF no estaba
-    // disponible al calcular: en ese caso el PDF se emite solo en UF.
-    const tienePesos = record.estimatedValueCLP > 0 && record.estimatedValueUF > 0;
+    // La UF usada se guardó al calcular. Si falta, el PDF se emite solo en UF:
+    // no se reconstruye desde el monto ni se usa la fecha de la solicitud como
+    // si fuera la fecha del valor.
+    const tienePesos =
+      record.estimatedValueCLP !== null &&
+      record.ufValueCLP !== null &&
+      record.estimatedValueUF > 0;
     const pdf = await generateTasacionPDF({
       tasacionId: record.id,
       clientName: record.clientName,
@@ -59,12 +67,8 @@ export async function cumplirEncargo(tasacionId: string, paymentId: string) {
         ? Math.round(ref.maxPricePerM2 * record.surface * 100) / 100
         : Math.round(record.estimatedValueUF * 1.15 * 100) / 100,
       pricePerM2UF: Math.round(valorM2 * 100) / 100,
-      // La UF usada se recupera del monto guardado; la fecha es la de la
-      // solicitud, que es el día al que correspondía ese valor.
-      ufValueCLP: tienePesos
-        ? Math.round((record.estimatedValueCLP / record.estimatedValueUF) * 100) / 100
-        : null,
-      ufDate: tienePesos ? record.createdAt : null,
+      ufValueCLP: record.ufValueCLP ?? null,
+      ufDate: record.ufDate ?? null,
       referenceYear: ref?.referenceYear ?? new Date().getFullYear(),
       sampleSize: ref?.sampleSize,
       createdAt: record.createdAt,

@@ -28,7 +28,7 @@ export interface ItemCosto {
   /** Fecha del dato (mes de revisión), visible en la interfaz. */
   fechaDato: string;
   estado: EstadoDato;
-  /** Nota adicional, usualmente el marcador {{PENDIENTE}} del encargo. */
+  /** Nota visible: qué es el valor y con quién se confirma. */
   nota?: string;
   /**
    * Tasa usada en el cálculo, cuando el ítem es cuantificable.
@@ -55,7 +55,7 @@ export const TIMBRES = {
   estado: "estimado" as EstadoDato,
   fuente:
     "Ley sobre Impuesto de Timbres y Estampillas. Tasa de referencia para créditos hipotecarios; el banco informa la tasa y el tope aplicables a cada operación.",
-  nota: "{{PENDIENTE: confirmar tasa y tope vigentes con el banco o el contador antes de publicar}}",
+  nota: "Valor referencial: la tasa y el tope definitivos los entrega el banco al momento de la operación.",
 };
 
 export const ITEMS: ItemCosto[] = [
@@ -86,7 +86,7 @@ export const ITEMS: ItemCosto[] = [
       "Arancel notarial vigente del oficio de cada notaría. Varía por notaría y por monto de la operación.",
     fechaDato: FECHA_REVISION,
     estado: "pendiente",
-    nota: "{{PENDIENTE: arancel notarial de referencia, cotizar con la notaría elegida}}",
+    nota: "Valor referencial: el arancel exacto lo entrega la notaría elegida al momento de la operación.",
   },
   {
     id: "cbr",
@@ -97,7 +97,7 @@ export const ITEMS: ItemCosto[] = [
       "Arancel del Conservador de Bienes Raíces competente. Se calcula sobre el valor de la inscripción, no sobre el precio de lista.",
     fechaDato: FECHA_REVISION,
     estado: "pendiente",
-    nota: "{{PENDIENTE: arancel de inscripción del CBR de Chillán, confirmar con el Conservador}}",
+    nota: "Valor referencial: el arancel exacto lo entrega el Conservador al momento de la inscripción.",
   },
   {
     id: "corretaje",
@@ -117,7 +117,7 @@ export const ITEMS: ItemCosto[] = [
     fuente: "Valores publicados por cada municipio y por el SII para el trámite específico.",
     fechaDato: FECHA_REVISION,
     estado: "pendiente",
-    nota: "{{PENDIENTE: valores de certificados municipales y de avalúo, confirmar}}",
+    nota: "Valor referencial: el monto exacto lo informa cada municipio y el SII al momento del trámite.",
   },
 ];
 

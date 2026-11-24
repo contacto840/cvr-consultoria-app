@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ENCARGO } from "@/lib/encargo";
 import { SITE } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Términos de uso",
   description:
-    "Condiciones de uso del sitio de CVR Propiedades SpA: alcance de la información, herramientas referenciales, servicio pagado, limitación de responsabilidad y ley aplicable.",
+    "Condiciones de uso del sitio de CVR Propiedades SpA: alcance de la información, herramientas referenciales, estimación gratuita, encargos cotizados por escrito y limitación de responsabilidad.",
   alternates: { canonical: "/terminos" },
 };
 
@@ -31,8 +30,8 @@ export default function TerminosPage() {
         <div className="container narrow prose">
           <div className="notice" role="note">
             <strong>Texto pendiente de revisión legal.</strong> Estos términos deben ser
-            revisados por la abogada de CVR Propiedades SpA antes de su publicación. Los
-            antecedentes marcados con {"{{PENDIENTE}}"} no están confirmados.
+            revisados por la abogada de CVR Propiedades SpA antes de su publicación. Las
+            condiciones de cada encargo se confirman por escrito antes de empezar.
           </div>
 
           <h2>1. Identificación del prestador</h2>
@@ -75,26 +74,29 @@ export default function TerminosPage() {
             dinero.
           </p>
 
-          <h2>4. Servicio pagado: encargo de tasación</h2>
+          <h2>4. Estimación referencial y encargos</h2>
           <p>
-            El servicio pagado que ofrece este sitio es un{" "}
-            <strong>{ENCARGO.nombre.toLowerCase()}</strong>, que ejecuta una persona y no un
-            sistema automático. Incluye la revisión de antecedentes, la inspección del
-            inmueble cuando corresponda y la emisión de un informe firmado.
+            La estimación referencial que entrega el estimador es <strong>gratuita</strong>{" "}
+            y automática. No constituye una tasación ni genera un encargo.
           </p>
           <p>
-            El documento automático que se envía al confirmarse el pago es una{" "}
+            El <strong>informe de tasación con inspección y firma no se cobra en línea: se
+            cotiza</strong>. El formulario envía una solicitud y CVR Propiedades SpA
+            responde por escrito con el honorario y el plazo antes de que el cliente
+            acepte. El documento automático que puede enviarse es una{" "}
             <strong>estimación referencial</strong>, no el informe del encargo: no lleva
             firma, no invoca una norma de tasación y no sirve para trámites. El producto
-            comprado es el informe firmado.
-          </p>
-          <p className="pending">{ENCARGO.plazoTexto}</p>
-          <p className="pending">
-            {"{{PENDIENTE: política de reembolso y condiciones de cancelación del encargo, definir con Carlos}}"}
+            del encargo es el informe firmado, y su alcance y plazo son los que se acuerdan
+            por escrito.
           </p>
           <p>
-            El pago se procesa mediante MercadoPago. CVR Propiedades SpA no almacena los
-            datos de la tarjeta ni del medio de pago.
+            <strong>Reembolsos.</strong> Como no se cobra en línea, las condiciones de cada
+            encargo se acuerdan por escrito antes de empezar y no hay cobro anticipado. Si
+            un encargo ya comenzó y se interrumpe, se aplica lo que se haya acordado por
+            escrito para ese encargo.
+          </p>
+          <p>
+            Este sitio no solicita ni almacena datos de tarjeta ni medios de pago.
           </p>
 
           <h2>5. Publicación de propiedades</h2>

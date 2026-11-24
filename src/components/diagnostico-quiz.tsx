@@ -187,7 +187,11 @@ export default function DiagnosticoQuiz() {
           aria-valuenow={paso + 1}
           aria-label="Avance del cuestionario"
         >
-          <span style={{ width: `${((paso + 1) / PREGUNTAS.length) * 100}%` }} />
+          <span
+            style={{
+              transform: `scaleX(${(paso + 1) / PREGUNTAS.length})`,
+            }}
+          />
         </div>
       </div>
 
